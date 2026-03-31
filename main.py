@@ -1,34 +1,40 @@
-from mtf_bias_engine import evaluate_mtf_bias
-from signal_dispatcher import dispatch_new_signal
+import time
+from mtf_bias_engine import get_mtf_bias
+from signal_dispatcher import generate_signal
+from signal_formatter import format_signal
+from telegram_sender import send_telegram_message
+
+
+CHECK_INTERVAL = 300  # 5 minutes
+
 
 def run_bot():
-    htf_structure = {"trend": "bullish"}
-    htf_bos = [{"direction": "bullish", "strength": "strong"}]
+    print("Bot started...")
 
-    mtf_structure = {"trend": "bullish"}
-    mtf_bos = [{"direction": "bullish", "strength": "strong"}]
+    while True:
+        try:
+            print("Checking market...")
 
-    ltf_direction = "bullish"
+            # Step 1: Get bias
+            bias = get_mtf_bias("EURUSD")
 
-    mtf_result = evaluate_mtf_bias(
-        htf_structure, htf_bos,
-        mtf_structure, mtf_bos,
-        ltf_direction
-    )
+            # Step 2: Generate signal
+            signal = generate_signal(bias)
 
-    if not mtf_result["trade_allowed"]:
-        print("No trade")
-        return
+            # Step 3: Only send if valid
+            if signal:
+                message = format_signal(signal)
+                send_telegram_message(message)
+                print("Signal sent:", message)
+            else:
+                print("No trade setup.")
 
-    trade = {
-        "direction": "bullish",
-        "entry": 1.1000,
-        "stop_loss": 1.0950,
-        "take_profit": 1.1100,
-        "rr": 2
-    }
+        except Exception as e:
+            print("Error:", e)
 
-    dispatch_new_signal(trade, "EURUSD", "5M")
+        # Wait 5 minutes
+        time.sleep(CHECK_INTERVAL)
+
 
 if __name__ == "__main__":
     run_bot()

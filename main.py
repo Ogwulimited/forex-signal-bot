@@ -1,5 +1,7 @@
 import traceback
 from mtf_bias_engine import get_mtf_bias
+from watchlist_formatter import format_watchlist_alert
+from telegram_sender import send_telegram_message
 
 PAIRS = [
     "EURUSD",
@@ -20,6 +22,11 @@ def run_once():
 
             if bias.get("aligned"):
                 print(f"{pair} is aligned for potential setup.", flush=True)
+
+                message = format_watchlist_alert(bias)
+                send_telegram_message(message)
+
+                print(f"Watchlist alert sent for {pair}", flush=True)
             else:
                 print(f"{pair} is not aligned.", flush=True)
 

@@ -1,5 +1,6 @@
 import traceback
 from mtf_bias_engine import get_mtf_bias
+from watchlist_filter import is_strong_watchlist_candidate
 from watchlist_formatter import format_watchlist_alert
 from watchlist_state import should_send_watchlist_alert
 from telegram_sender import send_telegram_message
@@ -21,8 +22,8 @@ def run_once():
             bias = get_mtf_bias(pair)
             print(f"Bias for {pair}: {bias}", flush=True)
 
-            if bias.get("aligned"):
-                print(f"{pair} is aligned for potential setup.", flush=True)
+            if is_strong_watchlist_candidate(bias):
+                print(f"{pair} passed strict watchlist filter.", flush=True)
 
                 direction = bias["bias_4h"]
 
@@ -32,9 +33,8 @@ def run_once():
                     print(f"Watchlist alert sent for {pair}", flush=True)
                 else:
                     print(f"Duplicate watchlist alert blocked for {pair}", flush=True)
-
             else:
-                print(f"{pair} is not aligned.", flush=True)
+                print(f"{pair} rejected by strict watchlist filter.", flush=True)
 
         except Exception as e:
             print(f"Error on {pair}: {e}", flush=True)

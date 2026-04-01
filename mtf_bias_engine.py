@@ -20,8 +20,8 @@ def detect_simple_trend(candles, lookback=20):
     return "neutral"
 
 def get_mtf_bias(pair):
-    candles_4h = fetch_candles(pair, interval="4h", outputsize=50)
-    candles_1h = fetch_candles(pair, interval="1h", outputsize=50)
+    candles_4h = fetch_candles(pair, interval="4h", outputsize=30)
+    candles_1h = fetch_candles(pair, interval="1h", outputsize=30)
 
     bias_4h = detect_simple_trend(candles_4h)
     bias_1h = detect_simple_trend(candles_1h)
@@ -36,4 +36,4 @@ def get_mtf_bias(pair):
         "bias_4h": bias_4h,
         "bias_1h": bias_1h,
         "aligned": aligned
-                 }
+    }

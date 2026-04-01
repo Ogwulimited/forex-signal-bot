@@ -12,7 +12,10 @@ PAIRS = [
     "AUDUSD",
     "USDCAD",
     "USDCHF",
-    "NZDUSD"
+    "NZDUSD",
+    "EURJPY",
+    "GBPJPY",
+    "EURGBP"
 ]
 
 def run_once():
@@ -22,15 +25,16 @@ def run_once():
         try:
             print(f"Checking {pair}...", flush=True)
 
-            # Step 1: MTF bias
             bias = get_mtf_bias(pair)
             print(f"Bias for {pair}: {bias}", flush=True)
 
-            # Step 2: Generate signal
+            if not bias.get("aligned"):
+                print(f"Skipping {pair} - HTF not aligned.", flush=True)
+                continue
+
             signal = generate_signal(bias)
             print(f"Signal for {pair}: {signal}", flush=True)
 
-            # Step 3: Send only if valid and not duplicate
             if signal:
                 if not is_duplicate_signal(signal):
                     message = format_signal(signal)

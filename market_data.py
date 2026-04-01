@@ -8,7 +8,7 @@ def format_symbol(pair):
         return pair
     return f"{pair[:3]}/{pair[3:]}"
 
-def fetch_candles(pair, interval="5min", outputsize=50):
+def fetch_candles(pair, interval="5min", outputsize=30):
     if not API_KEY:
         raise ValueError("TWELVE_DATA_API_KEY is missing")
 

@@ -8,10 +8,14 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,3 +33,11 @@ jobs:
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
         run: |
           python main.py
+
+      - name: Commit updated watchlist state
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add watchlist_state.json
+          git diff --cached --quiet || git commit -m "Update watchlist state"
+          git push

@@ -40,7 +40,10 @@ def generate_signal(bias, debug=True, ignore_chop=False):
             print("Signal rejected: no breakout detected.", flush=True)
         return None
     elif debug:
-        print(f"Breakout detected: {breakout}", flush=True)
+        print(
+            f"Breakout detected | type={breakout['type']} | level={breakout['level']} | break_index={breakout['break_index']}",
+            flush=True
+        )
 
     retest = detect_retest(candles_5m, breakout, direction)
     if not retest:
@@ -48,7 +51,10 @@ def generate_signal(bias, debug=True, ignore_chop=False):
             print("Signal rejected: no valid retest found.", flush=True)
         return None
     elif debug:
-        print(f"Retest detected: {retest}", flush=True)
+        print(
+            f"Retest detected | level={retest['level']} | retest_index={retest['retest_index']}",
+            flush=True
+        )
 
     rejection = detect_rejection_candle(candles_5m, direction)
     if not rejection:

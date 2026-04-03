@@ -1,6 +1,6 @@
 from swing_detector import find_swings
 
-def detect_breakout(candles, direction, breakout_window=8, debug=True):
+def detect_breakout(candles, direction, breakout_window=8, min_bars_after_swing=5, debug=True):
     if len(candles) < 20:
         if debug:
             print("Breakout debug: not enough candles.", flush=True)
@@ -14,19 +14,17 @@ def detect_breakout(candles, direction, breakout_window=8, debug=True):
             flush=True
         )
 
+    cutoff_index = len(candles) - min_bars_after_swing
+
     if direction == "buy":
-        if not swing_highs:
+        usable_swings = [s for s in swing_highs if s["index"] < cutoff_index]
+
+        if not usable_swings:
             if debug:
-                print("Breakout debug: no swing highs found for buy setup.", flush=True)
+                print("Breakout debug: no usable swing highs found for buy setup.", flush=True)
             return None
 
-        recent_swings = [s for s in swing_highs if s["index"] < len(candles) - 1]
-        if not recent_swings:
-            if debug:
-                print("Breakout debug: no valid historical swing highs.", flush=True)
-            return None
-
-        target_swing = recent_swings[-1]
+        target_swing = usable_swings[-1]
 
         if debug:
             print(
@@ -54,18 +52,14 @@ def detect_breakout(candles, direction, breakout_window=8, debug=True):
                 }
 
     elif direction == "sell":
-        if not swing_lows:
+        usable_swings = [s for s in swing_lows if s["index"] < cutoff_index]
+
+        if not usable_swings:
             if debug:
-                print("Breakout debug: no swing lows found for sell setup.", flush=True)
+                print("Breakout debug: no usable swing lows found for sell setup.", flush=True)
             return None
 
-        recent_swings = [s for s in swing_lows if s["index"] < len(candles) - 1]
-        if not recent_swings:
-            if debug:
-                print("Breakout debug: no valid historical swing lows.", flush=True)
-            return None
-
-        target_swing = recent_swings[-1]
+        target_swing = usable_swings[-1]
 
         if debug:
             print(

@@ -19,7 +19,7 @@ def run_test():
             print(f"{TEST_PAIR} is not HTF aligned. Skipping 5M test.", flush=True)
             return
 
-        signal = generate_signal(bias, debug=True)
+        signal = generate_signal(bias, debug=True, ignore_chop=True)
         print(f"Generated signal for {TEST_PAIR}: {signal}", flush=True)
 
         if signal:

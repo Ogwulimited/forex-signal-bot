@@ -1,37 +1,55 @@
-def detect_breakout(candles, direction, lookback=20, breakout_window=8):
-    if len(candles) < lookback + breakout_window:
+from swing_detector import find_swings
+
+def detect_breakout(candles, direction, breakout_window=8):
+    if len(candles) < 20:
         return None
 
-    start_index = len(candles) - breakout_window
+    swing_highs, swing_lows = find_swings(candles)
 
-    for i in range(start_index, len(candles)):
-        breakout_candle = candles[i]
-        history = candles[i - lookback:i]
+    if direction == "buy":
+        if not swing_highs:
+            return None
 
-        if len(history) < lookback:
-            continue
+        recent_swings = [s for s in swing_highs if s["index"] < len(candles) - 1]
+        if not recent_swings:
+            return None
 
-        history_high = max(c["high"] for c in history)
-        history_low = min(c["low"] for c in history)
+        target_swing = recent_swings[-1]
 
-        if direction == "buy":
-            broke = breakout_candle["close"] > history_high
-            if broke:
+        start_index = max(target_swing["index"] + 1, len(candles) - breakout_window)
+
+        for i in range(start_index, len(candles)):
+            candle = candles[i]
+            if candle["close"] > target_swing["price"]:
                 return {
                     "type": "bos_up",
-                    "level": history_high,
-                    "break_candle": breakout_candle,
-                    "break_index": i
+                    "level": target_swing["price"],
+                    "break_candle": candle,
+                    "break_index": i,
+                    "swing_index": target_swing["index"]
                 }
 
-        if direction == "sell":
-            broke = breakout_candle["close"] < history_low
-            if broke:
+    elif direction == "sell":
+        if not swing_lows:
+            return None
+
+        recent_swings = [s for s in swing_lows if s["index"] < len(candles) - 1]
+        if not recent_swings:
+            return None
+
+        target_swing = recent_swings[-1]
+
+        start_index = max(target_swing["index"] + 1, len(candles) - breakout_window)
+
+        for i in range(start_index, len(candles)):
+            candle = candles[i]
+            if candle["close"] < target_swing["price"]:
                 return {
                     "type": "bos_down",
-                    "level": history_low,
-                    "break_candle": breakout_candle,
-                    "break_index": i
+                    "level": target_swing["price"],
+                    "break_candle": candle,
+                    "break_index": i,
+                    "swing_index": target_swing["index"]
                 }
 
     return None

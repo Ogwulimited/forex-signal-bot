@@ -1,25 +1,37 @@
-def detect_breakout(candles, direction, lookback=20):
-    if len(candles) < lookback + 1:
+def detect_breakout(candles, direction, lookback=20, breakout_window=8):
+    if len(candles) < lookback + breakout_window:
         return None
 
-    recent = candles[-lookback-1:-1]
-    last = candles[-1]
+    start_index = len(candles) - breakout_window
 
-    recent_high = max(c["high"] for c in recent)
-    recent_low = min(c["low"] for c in recent)
+    for i in range(start_index, len(candles)):
+        breakout_candle = candles[i]
+        history = candles[i - lookback:i]
 
-    if direction == "buy" and last["close"] > recent_high:
-        return {
-            "type": "bos_up",
-            "level": recent_high,
-            "break_candle": last
-        }
+        if len(history) < lookback:
+            continue
 
-    if direction == "sell" and last["close"] < recent_low:
-        return {
-            "type": "bos_down",
-            "level": recent_low,
-            "break_candle": last
-        }
+        history_high = max(c["high"] for c in history)
+        history_low = min(c["low"] for c in history)
+
+        if direction == "buy":
+            broke = breakout_candle["close"] > history_high
+            if broke:
+                return {
+                    "type": "bos_up",
+                    "level": history_high,
+                    "break_candle": breakout_candle,
+                    "break_index": i
+                }
+
+        if direction == "sell":
+            broke = breakout_candle["close"] < history_low
+            if broke:
+                return {
+                    "type": "bos_down",
+                    "level": history_low,
+                    "break_candle": breakout_candle,
+                    "break_index": i
+                }
 
     return None

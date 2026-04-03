@@ -34,7 +34,7 @@ def generate_signal(bias, debug=True, ignore_chop=False):
         if debug:
             print("Chop filter bypassed for testing.", flush=True)
 
-    breakout = detect_breakout(candles_5m, direction)
+    breakout = detect_breakout(candles_5m, direction, debug=debug)
     if not breakout:
         if debug:
             print("Signal rejected: no breakout detected.", flush=True)

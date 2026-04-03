@@ -4,7 +4,7 @@ from signal_dispatcher import generate_signal
 from signal_formatter import format_signal
 from telegram_sender import send_telegram_message
 
-TEST_PAIR = "EURUSD"  # change this when needed
+TEST_PAIR = "EURUSD"  # change this as needed
 
 def run_test():
     print("One-pair 5M entry engine test started...", flush=True)
@@ -19,7 +19,7 @@ def run_test():
             print(f"{TEST_PAIR} is not HTF aligned. Skipping 5M test.", flush=True)
             return
 
-        signal = generate_signal(bias)
+        signal = generate_signal(bias, debug=True)
         print(f"Generated signal for {TEST_PAIR}: {signal}", flush=True)
 
         if signal:

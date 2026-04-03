@@ -6,7 +6,7 @@ from liquidity_sweep_detector import detect_liquidity_sweep
 from rr_calculator import calculate_trade_levels, risk_reward_ok
 from chop_filter import is_choppy_market
 
-def generate_signal(bias, debug=True):
+def generate_signal(bias, debug=True, ignore_chop=False):
     if not bias.get("aligned"):
         if debug:
             print("Signal rejected: HTF not aligned.", flush=True)
@@ -23,12 +23,16 @@ def generate_signal(bias, debug=True):
     if debug:
         print(f"Fetched {len(candles_5m)} x 5M candles for {pair}", flush=True)
 
-    if is_choppy_market(candles_5m):
+    if not ignore_chop:
+        if is_choppy_market(candles_5m):
+            if debug:
+                print("Signal rejected: market is choppy.", flush=True)
+            return None
+        elif debug:
+            print("Chop filter passed.", flush=True)
+    else:
         if debug:
-            print("Signal rejected: market is choppy.", flush=True)
-        return None
-    elif debug:
-        print("Chop filter passed.", flush=True)
+            print("Chop filter bypassed for testing.", flush=True)
 
     breakout = detect_breakout(candles_5m, direction)
     if not breakout:

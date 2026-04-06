@@ -4,7 +4,7 @@ from signal_dispatcher import generate_signal
 from signal_formatter import format_signal
 from telegram_sender import send_telegram_message
 
-TEST_PAIR = "GBPUSD"  # change this as needed
+TEST_PAIR = "USDJPY"  # change this as needed
 
 def run_test():
     print("One-pair 5M entry engine test started...", flush=True)

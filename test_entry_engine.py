@@ -1,6 +1,6 @@
 """
 Manual test script for 5M entry engine.
-Runs on a single pair with debug output and optional forced breakout.
+Runs on a single pair with debug output and optional forced breakout/sweep.
 """
 
 from mtf_bias_engine import get_mtf_bias
@@ -8,15 +8,16 @@ from signal_dispatcher import generate_signal
 from signal_formatter import format_signal
 from telegram_sender import send_telegram_message
 
-def test_entry_engine(pair, force_breakout=True):
+def test_entry_engine(pair, force_breakout=True, force_sweep=True):
     """
     Test 5M entry pipeline on a single pair.
     
     Parameters:
     - pair: Forex pair string (e.g., 'EURUSD')
     - force_breakout: if True, simulates breakout when none exists (for debugging)
+    - force_sweep: if True, simulates liquidity sweep when none exists (for debugging)
     """
-    print(f"\n--- Testing {pair} with force_breakout={force_breakout} ---")
+    print(f"\n--- Testing {pair} with force_breakout={force_breakout}, force_sweep={force_sweep} ---")
     
     # Get HTF bias
     bias_data = get_mtf_bias(pair)
@@ -26,8 +27,9 @@ def test_entry_engine(pair, force_breakout=True):
     signal = generate_signal(
         bias_data,
         debug=True,
-        ignore_chop=True,      # Bypass chop filter for testing
-        force_breakout=force_breakout
+        ignore_chop=True,
+        force_breakout=force_breakout,
+        force_sweep=force_sweep
     )
     
     print(f"Generated signal for {pair}: {signal}")
@@ -48,5 +50,5 @@ if __name__ == "__main__":
     TEST_PAIR = "USDJPY"   # Try AUDUSD, EURUSD, GBPUSD, USDJPY
     
     # Set force_breakout=True to simulate breakout for debugging
-    # Set force_breakout=False to require real market breakout
-    test_entry_engine(TEST_PAIR, force_breakout=True)
+    # Set force_sweep=True to simulate liquidity sweep for debugging
+    test_entry_engine(TEST_PAIR, force_breakout=True, force_sweep=True)

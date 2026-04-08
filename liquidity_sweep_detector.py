@@ -3,7 +3,7 @@ Liquidity sweep detector.
 Identifies when price sweeps a recent low (for buy) or recent high (for sell).
 """
 
-def detect_liquidity_sweep(candles, direction, lookback=20, debug=False):
+def detect_liquidity_sweep(candles, direction, lookback=20, debug=False, force_sweep=False):
     """
     Detect if price swept liquidity before potential entry.
     
@@ -12,9 +12,10 @@ def detect_liquidity_sweep(candles, direction, lookback=20, debug=False):
     - direction: 'buy' or 'sell'
     - lookback: number of candles to check for sweep level
     - debug: print logs
+    - force_sweep: if True and no real sweep, return simulated sweep
     
     Returns:
-    - dict with keys: level, sweep_index, type, or None
+    - dict with keys: level, sweep_index, type, forced flag, or None
     """
     if len(candles) < lookback + 5:
         if debug:
@@ -26,13 +27,11 @@ def detect_liquidity_sweep(candles, direction, lookback=20, debug=False):
     
     if direction == 'buy':
         # Need sweep of a recent low
-        # Find the lowest low in lookback period (excluding the very last candle)
         lookback_candles = candles[-lookback-1:-1] if len(candles) > lookback+1 else candles[:-1]
         if not lookback_candles:
             return None
         recent_low = min(c['low'] for c in lookback_candles)
         
-        # Check if any recent candle swept below that low and then closed above it
         for i in range(recent_start, len(candles)):
             candle = candles[i]
             if candle['low'] < recent_low and candle['close'] > recent_low:
@@ -42,10 +41,10 @@ def detect_liquidity_sweep(candles, direction, lookback=20, debug=False):
                     'level': recent_low,
                     'sweep_index': i,
                     'type': 'buy_sweep',
-                    'candle': candle
+                    'candle': candle,
+                    'forced': False
                 }
     else:  # sell
-        # Need sweep of a recent high
         lookback_candles = candles[-lookback-1:-1] if len(candles) > lookback+1 else candles[:-1]
         if not lookback_candles:
             return None
@@ -60,8 +59,37 @@ def detect_liquidity_sweep(candles, direction, lookback=20, debug=False):
                     'level': recent_high,
                     'sweep_index': i,
                     'type': 'sell_sweep',
-                    'candle': candle
+                    'candle': candle,
+                    'forced': False
                 }
+    
+    # No real sweep - force one if requested
+    if force_sweep:
+        if debug:
+            print(f"Liquidity sweep: FORCING simulated sweep for {direction}")
+        # Use a candle 2 positions from the end
+        sweep_index = len(candles) - 3
+        if sweep_index < 0:
+            sweep_index = 0
+        fake_candle = candles[sweep_index]
+        if direction == 'buy':
+            fake_level = fake_candle['low'] * 0.999
+            return {
+                'level': fake_level,
+                'sweep_index': sweep_index,
+                'type': 'buy_sweep',
+                'candle': fake_candle,
+                'forced': True
+            }
+        else:
+            fake_level = fake_candle['high'] * 1.001
+            return {
+                'level': fake_level,
+                'sweep_index': sweep_index,
+                'type': 'sell_sweep',
+                'candle': fake_candle,
+                'forced': True
+            }
     
     if debug:
         print(f"Liquidity sweep: no sweep detected for {direction}")

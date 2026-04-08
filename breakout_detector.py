@@ -118,13 +118,21 @@ def detect_breakout(candles, direction, breakout_window=5, min_bars_after_swing=
     if force_breakout:
         if debug:
             print(f"Breakout debug: FORCING simulated breakout for debugging. Using target {direction_lower} level={target_swing['level']}")
-        # Use the last candle as the simulated break candle
-        last_candle = candles[-1]
+        
+        # Use a candle that is NOT the last one, so retest has room to work
+        # Pick a candle 5 positions from the end (or earlier if not enough)
+        force_index = max(target_swing['index'] + 1, len(candles) - 6)
+        force_index = min(force_index, len(candles) - 2)  # ensure at least 1 candle after
+        break_candle = candles[force_index]
+        
+        if debug:
+            print(f"Breakout debug: forced break at index {force_index} (leaving room for retest)")
+        
         return {
             'type': direction_lower,
             'level': target_swing['level'],
-            'break_candle': last_candle,
-            'break_index': len(candles) - 1,
+            'break_candle': break_candle,
+            'break_index': force_index,
             'swing_index': target_swing['index'],
             'forced': True
         }

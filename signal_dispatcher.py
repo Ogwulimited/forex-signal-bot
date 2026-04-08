@@ -1,108 +1,129 @@
+"""
+Main entry logic for 5M trade signals.
+Combines HTF bias, breakout, retest, rejection, liquidity sweep, and RR.
+"""
+
 from market_data import fetch_candles
 from breakout_detector import detect_breakout
 from retest_detector import detect_retest
-from rejection_detector import detect_rejection_candle
+from rejection_detector import detect_rejection
 from liquidity_sweep_detector import detect_liquidity_sweep
-from rr_calculator import calculate_trade_levels, risk_reward_ok
-from chop_filter import is_choppy_market
+from chop_filter import is_choppy
+from rr_calculator import calculate_rr
 
-def generate_signal(bias, debug=True, ignore_chop=False):
-    if not bias.get("aligned"):
+def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=False):
+    """
+    Generate a 5M trade signal if all conditions are met.
+    
+    Parameters:
+    - bias_data: dict from mtf_bias_engine (must contain pair, bias_4h, bias_1h, aligned)
+    - debug: print detailed logs
+    - ignore_chop: bypass chop filter for testing
+    - force_breakout: force breakout detection to simulate breakout for debugging
+    
+    Returns:
+    - signal dict with keys: pair, direction, entry, sl, tp, timeframe, rr
+    - None if no signal
+    """
+    
+    pair = bias_data['pair']
+    
+    # 1. Check HTF alignment
+    if not bias_data.get('aligned', False):
         if debug:
-            print("Signal rejected: HTF not aligned.", flush=True)
+            print(f"Signal rejected: HTF not aligned (4H={bias_data.get('bias_4h')}, 1H={bias_data.get('bias_1h')})")
         return None
-
-    pair = bias["pair"]
-    direction = "buy" if bias["bias_4h"] == "bullish" else "sell"
-
-    if debug:
-        print(f"5M pipeline started for {pair} | direction={direction}", flush=True)
-
-    candles_5m = fetch_candles(pair, interval="5min", outputsize=100)
-
-    if debug:
-        print(f"Fetched {len(candles_5m)} x 5M candles for {pair}", flush=True)
-
-    if not ignore_chop:
-        if is_choppy_market(candles_5m):
-            if debug:
-                print("Signal rejected: market is choppy.", flush=True)
-            return None
-        elif debug:
-            print("Chop filter passed.", flush=True)
+    
+    # Determine direction from HTF bias (both same because aligned)
+    if bias_data['bias_4h'] == 'bullish':
+        direction = 'buy'
+    elif bias_data['bias_4h'] == 'bearish':
+        direction = 'sell'
     else:
         if debug:
-            print("Chop filter bypassed for testing.", flush=True)
-
-    breakout = detect_breakout(candles_5m, direction, debug=debug)
+            print("Signal rejected: neutral bias")
+        return None
+    
+    if debug:
+        print(f"5M pipeline started for {pair} | direction={direction}")
+    
+    # 2. Fetch 5M candles
+    candles = fetch_candles(pair, interval='5min', outputsize=100)
+    if not candles or len(candles) < 30:
+        if debug:
+            print("Signal rejected: insufficient 5M candles")
+        return None
+    
+    if debug:
+        print(f"Fetched {len(candles)} x 5M candles for {pair}")
+    
+    # 3. Chop filter (optional)
+    if not ignore_chop:
+        if is_choppy(candles, lookback=20, min_range_ratio=0.0005):
+            if debug:
+                print("Signal rejected: market too choppy")
+            return None
+    else:
+        if debug:
+            print("Chop filter bypassed for testing.")
+    
+    # 4. Breakout detection
+    breakout = detect_breakout(
+        candles,
+        direction,
+        breakout_window=5,
+        min_bars_after_swing=3,
+        debug=debug,
+        force_breakout=force_breakout
+    )
     if not breakout:
         if debug:
-            print("Signal rejected: no breakout detected.", flush=True)
+            print("Signal rejected: no breakout detected.")
         return None
-    elif debug:
-        print(
-            f"Breakout detected | type={breakout['type']} | level={breakout['level']} | break_index={breakout['break_index']}",
-            flush=True
-        )
-
-    retest = detect_retest(candles_5m, breakout, direction)
+    
+    if debug and breakout.get('forced'):
+        print("NOTE: Using FORCED breakout for debugging. Retest/rejection/sweep may be artificial.")
+    
+    # 5. Retest detection
+    retest = detect_retest(candles, breakout, direction, tolerance_ratio=0.0003, max_retest_bars=10, debug=debug)
     if not retest:
         if debug:
-            print("Signal rejected: no valid retest found.", flush=True)
+            print("Signal rejected: no retest detected.")
         return None
-    elif debug:
-        print(
-            f"Retest detected | level={retest['level']} | retest_index={retest['retest_index']}",
-            flush=True
-        )
-
-    rejection = detect_rejection_candle(candles_5m, direction)
+    
+    # 6. Rejection detection
+    rejection = detect_rejection(candles, direction, debug=debug)
     if not rejection:
         if debug:
-            print("Signal rejected: no rejection candle found.", flush=True)
+            print("Signal rejected: no rejection candle.")
         return None
-    elif debug:
-        print(f"Rejection candle detected: {rejection}", flush=True)
-
-    sweep = detect_liquidity_sweep(candles_5m, direction)
+    
+    # 7. Liquidity sweep detection
+    sweep = detect_liquidity_sweep(candles, direction, lookback=20, debug=debug)
     if not sweep:
         if debug:
-            print("Signal rejected: no liquidity sweep detected.", flush=True)
+            print("Signal rejected: no liquidity sweep.")
         return None
-    elif debug:
-        print(f"Liquidity sweep detected: {sweep}", flush=True)
-
-    trade = calculate_trade_levels(
-        candles=candles_5m,
-        direction=direction,
-        rejection=rejection,
-        sweep=sweep
-    )
-
-    if not trade:
+    
+    # 8. Calculate RR and trade levels
+    trade = calculate_rr(candles, direction, rejection, sweep, debug=debug)
+    if not trade or trade.get('rr', 0) < 2.0:
         if debug:
-            print("Signal rejected: invalid trade levels.", flush=True)
+            print(f"Signal rejected: RR insufficient (got {trade.get('rr', 0) if trade else 'None'})")
         return None
-    elif debug:
-        print(f"Trade levels calculated: {trade}", flush=True)
-
-    if not risk_reward_ok(trade["entry"], trade["sl"], trade["tp"], minimum_rr=2.0):
-        if debug:
-            print("Signal rejected: RR below 1:2.", flush=True)
-        return None
-    elif debug:
-        print("Risk/Reward filter passed.", flush=True)
-
+    
+    # 9. Build final signal
     signal = {
-        "pair": pair,
-        "timeframe": "5M",
-        "type": "BUY" if direction == "buy" else "SELL",
-        "entry": trade["entry"],
-        "sl": trade["sl"],
-        "tp": trade["tp"]
+        'pair': pair,
+        'direction': direction,
+        'entry': trade['entry'],
+        'sl': trade['sl'],
+        'tp': trade['tp'],
+        'timeframe': '5M',
+        'rr': trade['rr']
     }
-
+    
     if debug:
-        print(f"Final signal generated: {signal}", flush=True)
-
+        print(f"Signal generated: {signal}")
+    
     return signal

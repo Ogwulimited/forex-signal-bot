@@ -11,7 +11,7 @@ from liquidity_sweep_detector import detect_liquidity_sweep
 from chop_filter import is_choppy
 from rr_calculator import calculate_rr
 
-def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=False):
+def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=False, force_sweep=False):
     """
     Generate a 5M trade signal if all conditions are met.
     
@@ -20,6 +20,7 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
     - debug: print detailed logs
     - ignore_chop: bypass chop filter for testing
     - force_breakout: force breakout detection to simulate breakout for debugging
+    - force_sweep: force liquidity sweep detection to simulate sweep for debugging
     
     Returns:
     - signal dict with keys: pair, direction, entry, sl, tp, timeframe, rr
@@ -82,7 +83,7 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
         return None
     
     if debug and breakout.get('forced'):
-        print("NOTE: Using FORCED breakout for debugging. Retest/rejection/sweep may be artificial.")
+        print("NOTE: Using FORCED breakout for debugging.")
     
     # 5. Retest detection
     retest = detect_retest(candles, breakout, direction, tolerance_ratio=0.0003, max_retest_bars=10, debug=debug)
@@ -99,11 +100,14 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
         return None
     
     # 7. Liquidity sweep detection
-    sweep = detect_liquidity_sweep(candles, direction, lookback=20, debug=debug)
+    sweep = detect_liquidity_sweep(candles, direction, lookback=20, debug=debug, force_sweep=force_sweep)
     if not sweep:
         if debug:
             print("Signal rejected: no liquidity sweep.")
         return None
+    
+    if debug and sweep.get('forced'):
+        print("NOTE: Using FORCED liquidity sweep for debugging.")
     
     # 8. Calculate RR and trade levels
     trade = calculate_rr(candles, direction, rejection, sweep, debug=debug)

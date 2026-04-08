@@ -49,6 +49,5 @@ if __name__ == "__main__":
     # Change this pair to test different ones
     TEST_PAIR = "USDJPY"   # Try AUDUSD, EURUSD, GBPUSD, USDJPY
     
-    # Set force_breakout=True to simulate breakout for debugging
-    # Set force_sweep=True to simulate liquidity sweep for debugging
-    test_entry_engine(TEST_PAIR, force_breakout=True, force_sweep=True)
+    # Real market test – no forced data
+    test_entry_engine(TEST_PAIR, force_breakout=False, force_sweep=False)

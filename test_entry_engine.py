@@ -47,7 +47,7 @@ def test_entry_engine(pair, force_breakout=True, force_sweep=True):
 
 if __name__ == "__main__":
     # Change this pair to test different ones
-    TEST_PAIR = "GBPUSD"   # Try AUDUSD, EURUSD, GBPUSD, USDJPY
+    TEST_PAIR = "AUDUSD"   # Try AUDUSD, EURUSD, GBPUSD, USDJPY
     
     # Real market test – no forced data
     test_entry_engine(TEST_PAIR, force_breakout=False, force_sweep=False)

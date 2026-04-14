@@ -50,4 +50,4 @@ if __name__ == "__main__":
     TEST_PAIR = "EURUSD"   # Try AUDUSD, EURUSD, GBPUSD, USDJPY
     
     # Real market test – no forced data
-    test_entry_engine(TEST_PAIR, force_breakout=False, force_sweep=False)
+    test_entry_engine(TEST_PAIR, force_breakout=False, force_sweep=True)

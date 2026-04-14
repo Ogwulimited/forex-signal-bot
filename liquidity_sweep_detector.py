@@ -1,36 +1,20 @@
 """
-Improved liquidity sweep detector using swing points.
-Detects when price sweeps a recent swing low (for buy) or swing high (for sell)
-before a breakout/retest.
+Improved liquidity sweep detector – more permissive and detailed.
 """
 
 from swing_detector import find_swing_highs, find_swing_lows
 
 def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookback=20, debug=False, force_sweep=False):
     """
-    Detect if a liquidity sweep occurred before the potential entry.
-    
-    Parameters:
-    - candles: list of candle dicts with 'high', 'low', 'close'
-    - direction: 'buy' or 'sell'
-    - breakout: breakout dict (optional, for sequence alignment)
-    - retest: retest dict (optional)
-    - lookback: number of candles to look back for swing points
-    - debug: print logs
-    - force_sweep: if True and no real sweep, return simulated sweep
-    
-    Returns:
-    - dict with keys: level, sweep_index, type, forced (bool), candle
-    - None if no sweep and force_sweep=False
+    Detect liquidity sweep with more flexibility.
     """
-    
     if len(candles) < lookback:
         if debug:
             print("Liquidity sweep: insufficient candles")
         return None
     
-    # Determine the reference point for "before" – either retest index or breakout index
-    reference_index = len(candles) - 1  # default to last candle
+    # Reference index: use retest index if available, else breakout, else last candle
+    reference_index = len(candles) - 1
     if retest and retest.get('retest_index') is not None:
         reference_index = retest['retest_index']
     elif breakout and breakout.get('break_index') is not None:
@@ -39,43 +23,52 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
     if debug:
         print(f"Liquidity sweep: looking for sweep before index {reference_index}")
     
-    # Find swings up to reference_index (excluding candles after reference)
     relevant_candles = candles[:reference_index + 1]
     swing_highs = find_swing_highs(relevant_candles, left=2, right=2)
     swing_lows = find_swing_lows(relevant_candles, left=2, right=2)
     
-    # We only consider swings that are at least 'lookback' candles before reference
     min_swing_index = max(0, reference_index - lookback)
     
     if direction == 'buy':
-        # Need a recent swing low that was swept (price went below then closed above)
-        # Filter swing lows within lookback period
+        # Get all recent swing lows
         recent_swing_lows = [s for s in swing_lows if min_swing_index <= s['index'] < reference_index]
         if not recent_swing_lows:
             if debug:
                 print("Liquidity sweep: no recent swing lows found")
         else:
-            # Take the most recent swing low (largest index)
-            target_swing = max(recent_swing_lows, key=lambda x: x['index'])
-            sweep_level = target_swing['level']
             if debug:
-                print(f"Liquidity sweep: checking swing low at index {target_swing['index']} level={sweep_level}")
-            
-            # Check candles after the swing low but before reference for a sweep
-            for i in range(target_swing['index'] + 1, reference_index):
-                candle = candles[i]
-                if candle['low'] < sweep_level and candle['close'] > sweep_level:
-                    if debug:
-                        print(f"Liquidity sweep: buy sweep detected at index {i}, low={candle['low']}, close={candle['close']}")
-                    return {
-                        'level': sweep_level,
-                        'sweep_index': i,
-                        'type': 'buy_sweep',
-                        'candle': candle,
-                        'forced': False
-                    }
-            if debug:
-                print("Liquidity sweep: no sweep of the recent swing low")
+                print(f"Liquidity sweep: found {len(recent_swing_lows)} recent swing lows")
+            # Check each swing low (from most recent to oldest) for a sweep
+            for swing in sorted(recent_swing_lows, key=lambda x: x['index'], reverse=True):
+                sweep_level = swing['level']
+                if debug:
+                    print(f"  Checking swing low at index {swing['index']} level={sweep_level}")
+                # Look for a candle after the swing low that sweeps below and recovers
+                for i in range(swing['index'] + 1, reference_index):
+                    candle = candles[i]
+                    if candle['low'] < sweep_level:
+                        # Sweep occurred – now check if price recovered above sweep_level by reference_index
+                        # We'll consider any candle after the sweep that closes above sweep_level (or the close at reference_index)
+                        recovered = False
+                        for j in range(i, reference_index + 1):
+                            if candles[j]['close'] > sweep_level:
+                                recovered = True
+                                break
+                        if recovered:
+                            if debug:
+                                print(f"    ✅ Sweep detected at index {i}, low={candle['low']}, recovered by index {j if recovered else '?'}")
+                            return {
+                                'level': sweep_level,
+                                'sweep_index': i,
+                                'type': 'buy_sweep',
+                                'candle': candle,
+                                'forced': False
+                            }
+                        else:
+                            if debug:
+                                print(f"    Sweep at index {i} but no recovery")
+                if debug:
+                    print(f"  No valid sweep for this swing low")
     
     else:  # sell
         recent_swing_highs = [s for s in swing_highs if min_swing_index <= s['index'] < reference_index]
@@ -83,31 +76,40 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             if debug:
                 print("Liquidity sweep: no recent swing highs found")
         else:
-            target_swing = max(recent_swing_highs, key=lambda x: x['index'])
-            sweep_level = target_swing['level']
             if debug:
-                print(f"Liquidity sweep: checking swing high at index {target_swing['index']} level={sweep_level}")
-            
-            for i in range(target_swing['index'] + 1, reference_index):
-                candle = candles[i]
-                if candle['high'] > sweep_level and candle['close'] < sweep_level:
-                    if debug:
-                        print(f"Liquidity sweep: sell sweep detected at index {i}, high={candle['high']}, close={candle['close']}")
-                    return {
-                        'level': sweep_level,
-                        'sweep_index': i,
-                        'type': 'sell_sweep',
-                        'candle': candle,
-                        'forced': False
-                    }
-            if debug:
-                print("Liquidity sweep: no sweep of the recent swing high")
+                print(f"Liquidity sweep: found {len(recent_swing_highs)} recent swing highs")
+            for swing in sorted(recent_swing_highs, key=lambda x: x['index'], reverse=True):
+                sweep_level = swing['level']
+                if debug:
+                    print(f"  Checking swing high at index {swing['index']} level={sweep_level}")
+                for i in range(swing['index'] + 1, reference_index):
+                    candle = candles[i]
+                    if candle['high'] > sweep_level:
+                        recovered = False
+                        for j in range(i, reference_index + 1):
+                            if candles[j]['close'] < sweep_level:
+                                recovered = True
+                                break
+                        if recovered:
+                            if debug:
+                                print(f"    ✅ Sweep detected at index {i}, high={candle['high']}, recovered by index {j}")
+                            return {
+                                'level': sweep_level,
+                                'sweep_index': i,
+                                'type': 'sell_sweep',
+                                'candle': candle,
+                                'forced': False
+                            }
+                        else:
+                            if debug:
+                                print(f"    Sweep at index {i} but no recovery")
+                if debug:
+                    print(f"  No valid sweep for this swing high")
     
     # No real sweep – force if requested
     if force_sweep:
         if debug:
             print(f"Liquidity sweep: FORCING simulated sweep for {direction}")
-        # Create a fake sweep using the last candle before reference_index
         fake_index = max(0, reference_index - 1)
         fake_candle = candles[fake_index]
         if direction == 'buy':

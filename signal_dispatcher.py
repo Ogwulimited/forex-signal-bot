@@ -1,6 +1,5 @@
 """
 Main entry logic for 5M trade signals.
-Combines HTF bias, breakout, retest, rejection, liquidity sweep, and RR.
 """
 
 from market_data import fetch_candles
@@ -12,9 +11,6 @@ from chop_filter import is_choppy
 from rr_calculator import calculate_rr
 
 def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=False, force_sweep=False):
-    """
-    Generate a 5M trade signal if all conditions are met.
-    """
     pair = bias_data['pair']
     
     if not bias_data.get('aligned', False):
@@ -52,48 +48,31 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
         if debug:
             print("Chop filter bypassed for testing.")
     
-    breakout = detect_breakout(
-        candles, direction,
-        breakout_window=5,
-        min_bars_after_swing=3,
-        debug=debug,
-        force_breakout=force_breakout
-    )
+    breakout = detect_breakout(candles, direction, breakout_window=5, min_bars_after_swing=3, debug=debug, force_breakout=force_breakout)
     if not breakout:
         if debug:
             print("Signal rejected: no breakout detected.")
         return None
-    
     if debug and breakout.get('forced'):
         print("NOTE: Using FORCED breakout for debugging.")
     
-    retest = detect_retest(candles, breakout, direction,
-                          tolerance_ratio=0.0003, max_retest_bars=10, debug=debug)
+    retest = detect_retest(candles, breakout, direction, tolerance_ratio=0.0003, max_retest_bars=10, debug=debug)
     if not retest:
         if debug:
             print("Signal rejected: no retest detected.")
         return None
     
-    rejection = detect_rejection(candles, direction, debug=debug)
+    rejection = detect_rejection(candles, direction, retest=retest, breakout=breakout, debug=debug)
     if not rejection:
         if debug:
             print("Signal rejected: no rejection candle.")
         return None
     
-    # Pass breakout and retest to sweep detector for better sequence alignment
-    sweep = detect_liquidity_sweep(
-        candles, direction,
-        breakout=breakout,
-        retest=retest,
-        lookback=20,
-        debug=debug,
-        force_sweep=force_sweep
-    )
+    sweep = detect_liquidity_sweep(candles, direction, breakout=breakout, retest=retest, lookback=20, debug=debug, force_sweep=force_sweep)
     if not sweep:
         if debug:
             print("Signal rejected: no liquidity sweep.")
         return None
-    
     if debug and sweep.get('forced'):
         print("NOTE: Using FORCED liquidity sweep for debugging.")
     
@@ -112,8 +91,6 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
         'timeframe': '5M',
         'rr': trade['rr']
     }
-    
     if debug:
         print(f"Signal generated: {signal}")
-    
     return signal

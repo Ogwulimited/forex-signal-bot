@@ -14,7 +14,7 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
     Parameters:
     - candles: list of candle dicts (must include 'high','low','close')
     - direction: 'buy' or 'sell'
-    - breakout: dict from detect_breakout (contains 'index', 'level')
+    - breakout: dict from detect_breakout (contains 'break_index', 'level')
     - retest: dict from detect_retest (contains 'index')
     - lookback: number of candles for swing detection
     - debug: if True, print detailed reasoning
@@ -38,7 +38,12 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             print("  [SWEEP] No breakout provided → abort")
         return None
 
-    breakout_index = breakout['index']
+    breakout_index = breakout.get('break_index')
+    if breakout_index is None:
+        if debug:
+            print(f"  [SWEEP] ERROR: breakout dict missing 'break_index'. Keys present: {list(breakout.keys())}")
+        return None
+
     start_idx = breakout_index
     end_idx = len(candles) - 1
 
@@ -47,13 +52,11 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             print(f"  [SWEEP] Not enough candles after breakout (start={start_idx}, end={end_idx})")
         return None
 
-    # Find swings using your original swing detector
-    # For buy sweep we need swing lows; for sell sweep we need swing highs
+    # Swing detection using original functions
     if direction == 'buy':
         swings = find_swing_lows(candles, left=2, right=2)
         if debug:
             print(f"  [SWEEP] Found {len(swings)} swing lows")
-        # Filter swings that occurred before breakout
         prior_swings = [s for s in swings if s['index'] < breakout_index]
         if not prior_swings:
             if debug:

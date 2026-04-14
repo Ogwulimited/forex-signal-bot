@@ -14,7 +14,7 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
     Parameters:
     - candles: list of candle dicts (must include 'high','low','close')
     - direction: 'buy' or 'sell'
-    - breakout: dict from detect_breakout (contains 'break_index', 'level')
+    - breakout: dict from detect_breakout (contains 'index', 'level')
     - retest: dict from detect_retest (contains 'index')
     - lookback: number of candles for swing detection
     - debug: if True, print detailed reasoning
@@ -26,9 +26,11 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
     if force_sweep:
         if debug:
             print("  [SWEEP] force_sweep=True → returning dummy sweep")
+        dummy_price = candles[-1]['low'] if direction == 'buy' else candles[-1]['high']
         return {
             'index': len(candles) - 1,
-            'price': candles[-1]['low'] if direction == 'buy' else candles[-1]['high'],
+            'price': dummy_price,
+            'level': dummy_price,
             'swing_index': 0,
             'forced': True
         }
@@ -38,12 +40,7 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             print("  [SWEEP] No breakout provided → abort")
         return None
 
-    breakout_index = breakout.get('break_index')
-    if breakout_index is None:
-        if debug:
-            print(f"  [SWEEP] ERROR: breakout dict missing 'break_index'. Keys present: {list(breakout.keys())}")
-        return None
-
+    breakout_index = breakout['index']
     start_idx = breakout_index
     end_idx = len(candles) - 1
 
@@ -52,7 +49,6 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             print(f"  [SWEEP] Not enough candles after breakout (start={start_idx}, end={end_idx})")
         return None
 
-    # Swing detection using original functions
     if direction == 'buy':
         swings = find_swing_lows(candles, left=2, right=2)
         if debug:
@@ -73,11 +69,13 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             if candles[i]['low'] < swing_level:
                 for j in range(i + 1, end_idx + 1):
                     if candles[j]['close'] > swing_level:
+                        sweep_price = candles[i]['low']
                         if debug:
-                            print(f"  [SWEEP] ✅ BUY SWEEP DETECTED: dip at {candles[i]['low']:.5f} (idx {i}), recovery close {candles[j]['close']:.5f} (idx {j})")
+                            print(f"  [SWEEP] ✅ BUY SWEEP DETECTED: dip at {sweep_price:.5f} (idx {i}), recovery close {candles[j]['close']:.5f} (idx {j})")
                         return {
                             'index': i,
-                            'price': candles[i]['low'],
+                            'price': sweep_price,
+                            'level': sweep_price,
                             'swing_index': swing_idx,
                             'forced': False
                         }
@@ -104,11 +102,13 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             if candles[i]['high'] > swing_level:
                 for j in range(i + 1, end_idx + 1):
                     if candles[j]['close'] < swing_level:
+                        sweep_price = candles[i]['high']
                         if debug:
-                            print(f"  [SWEEP] ✅ SELL SWEEP DETECTED: spike at {candles[i]['high']:.5f} (idx {i}), recovery close {candles[j]['close']:.5f} (idx {j})")
+                            print(f"  [SWEEP] ✅ SELL SWEEP DETECTED: spike at {sweep_price:.5f} (idx {i}), recovery close {candles[j]['close']:.5f} (idx {j})")
                         return {
                             'index': i,
-                            'price': candles[i]['high'],
+                            'price': sweep_price,
+                            'level': sweep_price,
                             'swing_index': swing_idx,
                             'forced': False
                         }

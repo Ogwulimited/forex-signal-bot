@@ -14,7 +14,7 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
     Parameters:
     - candles: list of candle dicts (must include 'high','low','close')
     - direction: 'buy' or 'sell'
-    - breakout: dict from detect_breakout (contains 'index', 'level')
+    - breakout: dict from detect_breakout (contains 'break_index', 'level')
     - retest: dict from detect_retest (contains 'index')
     - lookback: number of candles for swing detection
     - debug: if True, print detailed reasoning
@@ -40,7 +40,12 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             print("  [SWEEP] No breakout provided → abort")
         return None
 
-    breakout_index = breakout['index']
+    breakout_index = breakout.get('break_index')
+    if breakout_index is None:
+        if debug:
+            print("  [SWEEP] Breakout dict missing 'break_index' key")
+        return None
+
     start_idx = breakout_index
     end_idx = len(candles) - 1
 

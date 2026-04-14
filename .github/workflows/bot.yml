@@ -1,43 +1,43 @@
-name: Forex Signal Bot
+name: Forex Watchlist Bot
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
-  workflow_dispatch:
+    - cron: '*/5 * * * *'   # Runs every 5 minutes
+  workflow_dispatch:         # Allows manual trigger
+
+permissions:
+  contents: write            # Required to push state file updates
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install requests
 
-      - name: Run bot
+      - name: Run watchlist scanner
         env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
-        run: |
-          python main.py
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
 
-      - name: Commit updated watchlist state
+      - name: Commit state file updates (if any)
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add watchlist_state.json
-          git diff --cached --quiet || git commit -m "Update watchlist state"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update watchlist state [skip ci]"
           git push

@@ -1,6 +1,6 @@
 """
 Test entry signal using generate_signal from signal_dispatcher.
-Runs full 5M pipeline with debug=True, force flags OFF.
+Runs full 5M pipeline with debug=True, force_breakout=True for sweep debugging.
 """
 from mtf_bias_engine import get_mtf_bias
 from signal_dispatcher import generate_signal
@@ -20,13 +20,13 @@ def main():
     print(f"1H bias: {bias_data['bias_1h']} (strength={bias_data['strength_1h']})")
     print(f"Aligned: {bias_data['aligned']}")
 
-    # 2. Run signal generation
-    print("\n--- Running generate_signal (debug ON, force flags OFF) ---\n")
+    # 2. Run signal generation with FORCED BREAKOUT, natural sweep
+    print("\n--- Running generate_signal (force_breakout=True, force_sweep=False) ---\n")
     signal = generate_signal(
         bias_data=bias_data,
         debug=True,
-        ignore_chop=True,          # Keep chop filter bypassed for now
-        force_breakout=False,
+        ignore_chop=True,
+        force_breakout=True,       # Simulate breakout so sweep detector runs
         force_sweep=False          # Natural sweep detection
     )
 

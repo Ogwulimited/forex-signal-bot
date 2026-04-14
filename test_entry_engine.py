@@ -5,8 +5,19 @@ Run with: python test_entry_engine.py
 import json
 import sys
 from market_data import fetch_candles
-from mtf_bias_engine import compute_mtf_bias
 from signal_dispatcher import check_entry_signal
+
+# Try to import the bias function with the correct name
+try:
+    from mtf_bias_engine import get_mtf_bias as compute_mtf_bias
+except ImportError:
+    try:
+        from mtf_bias_engine import compute_bias as compute_mtf_bias
+    except ImportError:
+        # If both fail, import the module and list functions to help debug
+        import mtf_bias_engine
+        print("Available functions in mtf_bias_engine:", [f for f in dir(mtf_bias_engine) if not f.startswith('_')])
+        sys.exit(1)
 
 # Configuration
 PAIR = "EURUSD"          # Change to any pair you want to test

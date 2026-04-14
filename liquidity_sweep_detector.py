@@ -6,12 +6,35 @@ Detects liquidity grabs:
 - Sell setup: price sweeps above a recent swing high, then recovers (close below).
 
 This version includes:
+- Automatic function discovery for swing detection
 - Debug logging (prints why sweep failed or succeeded)
-- More lenient parameters (adjustable)
+- More lenient parameters
 - Option to use force_sweep override (default False for testing)
 """
 
-from swing_detector import find_swings
+import sys
+
+# Try to import the swing detection function, no matter its name
+try:
+    from swing_detector import find_swings as find_swings_func
+except ImportError:
+    try:
+        from swing_detector import find_swing_points as find_swings_func
+    except ImportError:
+        try:
+            from swing_detector import detect_swings as find_swings_func
+        except ImportError:
+            try:
+                from swing_detector import get_swings as find_swings_func
+            except ImportError:
+                # Last resort: import module and search for any function that returns swings
+                import swing_detector
+                funcs = [f for f in dir(swing_detector) if callable(getattr(swing_detector, f)) and 'swing' in f.lower()]
+                if funcs:
+                    find_swings_func = getattr(swing_detector, funcs[0])
+                    print(f"  [SWEEP] Using swing function: {funcs[0]}", file=sys.stderr)
+                else:
+                    raise ImportError("No swing detection function found in swing_detector.py")
 
 def detect_liquidity_sweep(candles, direction, breakout_index=None, retest_index=None, force_sweep=False, debug=True):
     """
@@ -52,21 +75,19 @@ def detect_liquidity_sweep(candles, direction, breakout_index=None, retest_index
             print(f"  [SWEEP] Not enough candles after breakout (start={start_idx}, end={end_idx})")
         return None
 
-    # Find swings in the entire dataset (or a reasonable lookback)
-    swings = find_swings(candles, left=5, right=5)
+    # Find swings using the discovered function
+    swings = find_swings_func(candles, left=5, right=5)
     swing_highs = [s for s in swings if s['type'] == 'high']
     swing_lows  = [s for s in swings if s['type'] == 'low']
 
     if direction == 'buy':
         # Buy sweep: price dips below a prior swing low, then closes above it
-        # We look for any swing low before breakout_index
         relevant_swings = [s for s in swing_lows if s['index'] < breakout_index]
         if not relevant_swings:
             if debug:
                 print("  [SWEEP] No prior swing lows found")
             return None
 
-        # Use the most recent swing low before breakout
         target_swing = max(relevant_swings, key=lambda x: x['index'])
         swing_level = target_swing['price']
         swing_idx = target_swing['index']
@@ -74,11 +95,9 @@ def detect_liquidity_sweep(candles, direction, breakout_index=None, retest_index
         if debug:
             print(f"  [SWEEP] Buy sweep check: looking for dip below swing low {swing_level:.5f} at index {swing_idx}")
 
-        # Scan from breakout_index onward for a candle that dips below swing low
         for i in range(start_idx, end_idx + 1):
             candle_low = candles[i]['low']
             if candle_low < swing_level:
-                # Found a dip below swing low. Now check for recovery: a subsequent candle closes above swing level
                 for j in range(i + 1, end_idx + 1):
                     if candles[j]['close'] > swing_level:
                         sweep_price = candle_low
@@ -92,12 +111,10 @@ def detect_liquidity_sweep(candles, direction, breakout_index=None, retest_index
                             'recovery_index': j,
                             'forced': False
                         }
-                # If we got here, dip occurred but no recovery yet (maybe later? we keep scanning)
         if debug:
             print("  [SWEEP] ❌ No valid buy sweep found (either no dip below swing low or no recovery)")
 
     else:  # direction == 'sell'
-        # Sell sweep: price spikes above a prior swing high, then closes below it
         relevant_swings = [s for s in swing_highs if s['index'] < breakout_index]
         if not relevant_swings:
             if debug:

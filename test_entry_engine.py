@@ -1,43 +1,70 @@
 """
-Test entry signal using generate_signal from signal_dispatcher.
-Runs full 5M pipeline with debug=True, force_breakout=True for sweep debugging.
+Standalone Sweep Detector Debugger
+Bypasses retest/rejection to focus solely on liquidity sweep logic.
 """
+from market_data import fetch_candles
 from mtf_bias_engine import get_mtf_bias
-from signal_dispatcher import generate_signal
+from liquidity_sweep_detector import detect_liquidity_sweep
 
 PAIR = "EURUSD"
 
 def main():
-    print(f"\n=== TEST ENTRY SIGNAL FOR {PAIR} ===\n")
+    print(f"\n=== SWEEP DETECTOR DEBUG ({PAIR}) ===\n")
 
-    # 1. Get HTF bias
+    # Fetch 5M candles
+    candles = fetch_candles(PAIR, interval="5min", outputsize=100)
+    if not candles:
+        print("❌ Failed to fetch candles.")
+        return
+    print(f"✅ Fetched {len(candles)} candles")
+
+    # Get direction from MTF bias
     bias_data = get_mtf_bias(PAIR)
     if not bias_data:
         print("❌ Failed to get MTF bias.")
         return
 
-    print(f"4H bias: {bias_data['bias_4h']} (strength={bias_data['strength_4h']})")
-    print(f"1H bias: {bias_data['bias_1h']} (strength={bias_data['strength_1h']})")
-    print(f"Aligned: {bias_data['aligned']}")
+    if bias_data['bias_4h'] == 'bullish':
+        direction = 'buy'
+    elif bias_data['bias_4h'] == 'bearish':
+        direction = 'sell'
+    else:
+        print(f"Neutral bias, defaulting to 'buy' for testing.")
+        direction = 'buy'
 
-    # 2. Run signal generation with FORCED BREAKOUT, natural sweep
-    print("\n--- Running generate_signal (force_breakout=True, force_sweep=False) ---\n")
-    signal = generate_signal(
-        bias_data=bias_data,
+    print(f"Direction: {direction}")
+
+    # Simulate a breakout at a realistic index (not the very last candle)
+    # Choose index 10 candles from the end to leave room for potential sweep/recovery
+    breakout_index = max(0, len(candles) - 11)
+    simulated_breakout = {
+        'break_index': breakout_index,
+        'level': candles[breakout_index]['close'],  # rough level
+        'forced': True
+    }
+
+    print(f"\n--- Simulated breakout at index {breakout_index} ---")
+
+    # Run sweep detector with force_sweep=False, debug=True
+    print("\n--- Running sweep detector (force_sweep=False) ---\n")
+    sweep = detect_liquidity_sweep(
+        candles=candles,
+        direction=direction,
+        breakout=simulated_breakout,
+        retest=None,           # Not needed for sweep detection
+        lookback=20,
         debug=True,
-        ignore_chop=True,
-        force_breakout=True,       # Simulate breakout so sweep detector runs
-        force_sweep=False          # Natural sweep detection
+        force_sweep=False
     )
 
-    if signal:
-        print("\n✅ SIGNAL GENERATED:")
-        for k, v in signal.items():
+    if sweep:
+        print("\n✅ SWEEP DETECTED:")
+        for k, v in sweep.items():
             print(f"  {k}: {v}")
     else:
-        print("\n❌ No signal generated.")
+        print("\n❌ No sweep detected.")
 
-    print("\n=== TEST COMPLETE ===")
+    print("\n=== DEBUG COMPLETE ===")
 
 if __name__ == "__main__":
     main()

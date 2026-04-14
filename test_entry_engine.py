@@ -20,14 +20,15 @@ def main():
     print(f"1H bias: {bias_data['bias_1h']} (strength={bias_data['strength_1h']})")
     print(f"Aligned: {bias_data['aligned']}")
 
-    # Run signal generation with debug ON, force flags OFF
-    print("\n--- Running generate_signal ---\n")
+    # Run signal generation with debug ON
+    # force_breakout=True so we can test the sweep detector even without a real breakout
+    print("\n--- Running generate_signal (force_breakout=True for sweep debug) ---\n")
     signal = generate_signal(
         bias_data=bias_data,
         debug=True,
-        ignore_chop=True,          # Keep chop bypassed for now
-        force_breakout=False,
-        force_sweep=False          # We want natural detection
+        ignore_chop=True,
+        force_breakout=True,    # <-- Force breakout to reach sweep detector
+        force_sweep=False       # <-- We want natural sweep detection
     )
 
     if signal:

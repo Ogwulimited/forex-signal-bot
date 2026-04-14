@@ -1,13 +1,14 @@
 """
-Liquidity Sweep Detector
-Detects liquidity grabs:
-- Buy: price sweeps below a recent swing low, then recovers (close above).
-- Sell: price sweeps above a recent swing high, then recovers (close below).
+Liquidity Sweep Detector (Refined)
+Detects liquidity grabs with adaptive sensitivity.
+Mode 'adaptive': uses recent low/high since breakout as target.
+Mode 'strict': uses prior swing low/high (original logic).
 """
 
 from swing_detector import find_swing_lows, find_swing_highs
 
-def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookback=20, debug=False, force_sweep=False):
+def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookback=20,
+                           debug=False, force_sweep=False, sweep_mode='adaptive'):
     """
     Detect a liquidity sweep.
 
@@ -15,10 +16,11 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
     - candles: list of candle dicts (must include 'high','low','close')
     - direction: 'buy' or 'sell'
     - breakout: dict from detect_breakout (contains 'break_index', 'level')
-    - retest: dict from detect_retest (contains 'index')
-    - lookback: number of candles for swing detection
+    - retest: dict from detect_retest (optional, contains 'index')
+    - lookback: number of candles for swing detection (used in strict mode)
     - debug: if True, print detailed reasoning
     - force_sweep: if True, always return a dummy sweep
+    - sweep_mode: 'strict' (original) or 'adaptive' (more sensitive, default)
 
     Returns:
     - dict with sweep details or None
@@ -54,70 +56,113 @@ def detect_liquidity_sweep(candles, direction, breakout=None, retest=None, lookb
             print(f"  [SWEEP] Not enough candles after breakout (start={start_idx}, end={end_idx})")
         return None
 
+    # ---- Determine Target Level ----
+    if sweep_mode == 'adaptive':
+        # Use the lowest low (buy) / highest high (sell) since breakout
+        if direction == 'buy':
+            recent_lows = [candles[i]['low'] for i in range(start_idx, end_idx + 1)]
+            target_level = min(recent_lows)
+            target_desc = f"lowest low since breakout = {target_level:.5f}"
+        else:
+            recent_highs = [candles[i]['high'] for i in range(start_idx, end_idx + 1)]
+            target_level = max(recent_highs)
+            target_desc = f"highest high since breakout = {target_level:.5f}"
+        swing_idx = None
+        if debug:
+            print(f"  [SWEEP] Adaptive mode: {target_desc}")
+    else:  # strict mode (original)
+        if direction == 'buy':
+            swings = find_swing_lows(candles, left=2, right=2)
+            if debug:
+                print(f"  [SWEEP] Found {len(swings)} swing lows")
+            prior_swings = [s for s in swings if s['index'] < breakout_index]
+            if not prior_swings:
+                if debug:
+                    print("  [SWEEP] No prior swing lows found before breakout")
+                return None
+            target_swing = max(prior_swings, key=lambda x: x['index'])
+            target_level = target_swing['level']
+            swing_idx = target_swing['index']
+            if debug:
+                print(f"  [SWEEP] Strict mode: target swing low {target_level:.5f} at index {swing_idx}")
+        else:
+            swings = find_swing_highs(candles, left=2, right=2)
+            if debug:
+                print(f"  [SWEEP] Found {len(swings)} swing highs")
+            prior_swings = [s for s in swings if s['index'] < breakout_index]
+            if not prior_swings:
+                if debug:
+                    print("  [SWEEP] No prior swing highs found before breakout")
+                return None
+            target_swing = max(prior_swings, key=lambda x: x['index'])
+            target_level = target_swing['level']
+            swing_idx = target_swing['index']
+            if debug:
+                print(f"  [SWEEP] Strict mode: target swing high {target_level:.5f} at index {swing_idx}")
+
+    # ---- Sweep Detection ----
     if direction == 'buy':
-        swings = find_swing_lows(candles, left=2, right=2)
-        if debug:
-            print(f"  [SWEEP] Found {len(swings)} swing lows")
-        prior_swings = [s for s in swings if s['index'] < breakout_index]
-        if not prior_swings:
-            if debug:
-                print("  [SWEEP] No prior swing lows found before breakout")
-            return None
-        target_swing = max(prior_swings, key=lambda x: x['index'])
-        swing_level = target_swing['level']
-        swing_idx = target_swing['index']
-
-        if debug:
-            print(f"  [SWEEP] Buy sweep check: target swing low {swing_level:.5f} at index {swing_idx}")
-
+        # Look for a dip below target level, then a recovery close above that same target level
+        # OR a candle that wicks below and closes above its own low (wick sweep)
         for i in range(start_idx, end_idx + 1):
-            if candles[i]['low'] < swing_level:
+            candle_low = candles[i]['low']
+            if candle_low < target_level:
+                # Check for recovery in subsequent candles
                 for j in range(i + 1, end_idx + 1):
-                    if candles[j]['close'] > swing_level:
-                        sweep_price = candles[i]['low']
+                    if candles[j]['close'] > target_level:
                         if debug:
-                            print(f"  [SWEEP] ✅ BUY SWEEP DETECTED: dip at {sweep_price:.5f} (idx {i}), recovery close {candles[j]['close']:.5f} (idx {j})")
+                            print(f"  [SWEEP] ✅ BUY SWEEP DETECTED: dip at {candle_low:.5f} (idx {i}), recovery close {candles[j]['close']:.5f} (idx {j})")
                         return {
                             'index': i,
-                            'price': sweep_price,
-                            'level': sweep_price,
+                            'price': candle_low,
+                            'level': candle_low,
                             'swing_index': swing_idx,
-                            'forced': False
+                            'forced': False,
+                            'mode': sweep_mode
                         }
+                # Also check if the same candle closed above its own low (wick sweep)
+                if candles[i]['close'] > candle_low:
+                    if debug:
+                        print(f"  [SWEEP] ✅ BUY WICK SWEEP DETECTED: candle {i} wicked to {candle_low:.5f} and closed at {candles[i]['close']:.5f}")
+                    return {
+                        'index': i,
+                        'price': candle_low,
+                        'level': candle_low,
+                        'swing_index': swing_idx,
+                        'forced': False,
+                        'mode': sweep_mode
+                    }
         if debug:
-            print("  [SWEEP] ❌ No valid buy sweep (no dip below swing low with recovery)")
+            print(f"  [SWEEP] ❌ No valid buy sweep (no dip below {target_level:.5f} with recovery)")
 
-    else:  # direction == 'sell'
-        swings = find_swing_highs(candles, left=2, right=2)
-        if debug:
-            print(f"  [SWEEP] Found {len(swings)} swing highs")
-        prior_swings = [s for s in swings if s['index'] < breakout_index]
-        if not prior_swings:
-            if debug:
-                print("  [SWEEP] No prior swing highs found before breakout")
-            return None
-        target_swing = max(prior_swings, key=lambda x: x['index'])
-        swing_level = target_swing['level']
-        swing_idx = target_swing['index']
-
-        if debug:
-            print(f"  [SWEEP] Sell sweep check: target swing high {swing_level:.5f} at index {swing_idx}")
-
+    else:  # sell
         for i in range(start_idx, end_idx + 1):
-            if candles[i]['high'] > swing_level:
+            candle_high = candles[i]['high']
+            if candle_high > target_level:
                 for j in range(i + 1, end_idx + 1):
-                    if candles[j]['close'] < swing_level:
-                        sweep_price = candles[i]['high']
+                    if candles[j]['close'] < target_level:
                         if debug:
-                            print(f"  [SWEEP] ✅ SELL SWEEP DETECTED: spike at {sweep_price:.5f} (idx {i}), recovery close {candles[j]['close']:.5f} (idx {j})")
+                            print(f"  [SWEEP] ✅ SELL SWEEP DETECTED: spike at {candle_high:.5f} (idx {i}), recovery close {candles[j]['close']:.5f} (idx {j})")
                         return {
                             'index': i,
-                            'price': sweep_price,
-                            'level': sweep_price,
+                            'price': candle_high,
+                            'level': candle_high,
                             'swing_index': swing_idx,
-                            'forced': False
+                            'forced': False,
+                            'mode': sweep_mode
                         }
+                if candles[i]['close'] < candle_high:
+                    if debug:
+                        print(f"  [SWEEP] ✅ SELL WICK SWEEP DETECTED: candle {i} wicked to {candle_high:.5f} and closed at {candles[i]['close']:.5f}")
+                    return {
+                        'index': i,
+                        'price': candle_high,
+                        'level': candle_high,
+                        'swing_index': swing_idx,
+                        'forced': False,
+                        'mode': sweep_mode
+                    }
         if debug:
-            print("  [SWEEP] ❌ No valid sell sweep (no spike above swing high with recovery)")
+            print(f"  [SWEEP] ❌ No valid sell sweep (no spike above {target_level:.5f} with recovery)")
 
     return None

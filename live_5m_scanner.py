@@ -42,7 +42,7 @@ def main():
                 debug=False,
                 ignore_chop=True,
                 force_breakout=False,
-                force_sweep=True
+                force_sweep=False
             )
         except Exception as e:
             print(f"  ⚠️ Error generating signal: {e}")

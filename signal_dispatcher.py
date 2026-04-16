@@ -68,7 +68,8 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
             print("Signal rejected: no rejection candle.")
         return None
     
-    sweep = detect_liquidity_sweep(candles, direction, breakout=breakout, retest=retest, lookback=20, debug=debug, force_sweep=force_sweep)
+    # === CHANGE HERE: added sweep_mode='adaptive' ===
+    sweep = detect_liquidity_sweep(candles, direction, breakout=breakout, retest=retest, lookback=20, debug=debug, force_sweep=force_sweep, sweep_mode='adaptive')
     if not sweep:
         if debug:
             print("Signal rejected: no liquidity sweep.")

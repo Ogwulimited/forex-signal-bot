@@ -68,7 +68,6 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
             print("Signal rejected: no rejection candle.")
         return None
     
-    # === CHANGE HERE: added sweep_mode='adaptive' ===
     sweep = detect_liquidity_sweep(candles, direction, breakout=breakout, retest=retest, lookback=20, debug=debug, force_sweep=force_sweep, sweep_mode='adaptive')
     if not sweep:
         if debug:
@@ -77,10 +76,10 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
     if debug and sweep.get('forced'):
         print("NOTE: Using FORCED liquidity sweep for debugging.")
     
-    trade = calculate_rr(candles, direction, rejection, sweep, debug=debug)
-    if not trade or trade.get('rr', 0) < 2.0:
+    trade = calculate_rr(candles, direction, rejection, sweep, min_rr=1.5, debug=debug)
+    if not trade:
         if debug:
-            print(f"Signal rejected: RR insufficient (got {trade.get('rr', 0) if trade else 'None'})")
+            print(f"Signal rejected: RR insufficient or invalid")
         return None
     
     signal = {

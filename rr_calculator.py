@@ -51,4 +51,4 @@ def calculate_rr(candles, direction, rejection, sweep, min_rr=1.5, debug=False):
         'sl': sl,
         'tp': tp,
         'rr': rr
-        }
+    }

@@ -17,9 +17,9 @@ def passes_watchlist(bias_data):
         return False
     
     # Relaxed thresholds for quantity over quality
-    STRENGTH_MIN = 2          # Was 3
-    RANGE_RATIO_4H_MIN = 0.002   # Was 0.003
-    RANGE_RATIO_1H_MIN = 0.001   # Was 0.0015
+    STRENGTH_MIN = 2
+    RANGE_RATIO_4H_MIN = 0.002
+    RANGE_RATIO_1H_MIN = 0.001
     
     if bias_data['strength_4h'] < STRENGTH_MIN:
         return False
@@ -31,3 +31,6 @@ def passes_watchlist(bias_data):
         return False
     
     return True
+
+# Alias for backward compatibility with original main.py
+is_strong_watchlist_candidate = passes_watchlist

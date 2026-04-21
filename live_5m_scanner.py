@@ -5,17 +5,17 @@ Scans EURUSD, GBPUSD, USDJPY, AUDUSD every 30 minutes.
 import time
 from mtf_bias_engine import get_mtf_bias
 from signal_dispatcher import generate_signal
-from telegram_sender import send_telegram
+from telegram_sender import send_telegram_message
 from signal_formatter import format_signal
 from signal_state import should_send_signal, mark_signal_sent
 
 # Configuration
 PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"]
-DELAY_BETWEEN_PAIRS = 20          # 4 pairs * 20s = 80s total, well under 8/min limit
+DELAY_BETWEEN_PAIRS = 20
 DEBUG = True
 IGNORE_CHOP = True
 FORCE_BREAKOUT = False
-FORCE_SWEEP = False               # Natural adaptive detection
+FORCE_SWEEP = False
 
 def main():
     print(f"Live 5M scanner started at {time.strftime('%Y-%m-%dT%H:%M:%S')}")
@@ -40,9 +40,13 @@ def main():
         if signal:
             if should_send_signal(pair, signal['direction']):
                 message = format_signal(signal)
-                send_telegram(message)
+                try:
+                    send_telegram_message(message)
+                    print(f"  ✅ Signal sent: {signal['direction']} {pair}")
+                except Exception as e:
+                    print(f"  ⚠️ Telegram send failed: {e}")
+                    print(f"  Signal content: {message}")
                 mark_signal_sent(pair, signal['direction'])
-                print(f"  ✅ Signal sent: {signal['direction']} {pair}")
                 signals_sent += 1
             else:
                 print(f"  ⏳ Signal suppressed (anti-spam cooldown)")

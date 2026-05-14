@@ -1,109 +1,102 @@
 """
-Swing-based Break of Structure (BOS) detector.
-Identifies when price breaks beyond a prior swing high (buy) or swing low (sell).
+Swing-based Break of Structure (BOS) detector – Relaxed
+Accepts wick breaks (high/low beyond swing) in addition to closes.
 """
 
 from swing_detector import find_swing_highs, find_swing_lows
 
-def detect_breakout(candles, direction, breakout_window=5, min_bars_after_swing=3, debug=False, force_breakout=False):
+def detect_breakout(candles, direction, breakout_window=5, min_bars_after_swing=3,
+                    debug=False, force_breakout=False, use_wicks=True):
     """
     Detect if price has broken a prior swing level.
     
     Parameters:
-    - candles: list of candle dicts with 'high', 'low', 'close'
+    - candles: list of dicts with 'high','low','close'
     - direction: 'buy' or 'sell'
-    - breakout_window: number of recent candles to check for breakout
-    - min_bars_after_swing: minimum candles after a swing before considering it valid
+    - breakout_window: number of recent candles to check
+    - min_bars_after_swing: min candles after swing before valid
     - debug: print detailed logs
-    - force_breakout: if True and no real breakout, return simulated breakout using target swing
+    - force_breakout: simulate breakout if none real
+    - use_wicks: if True, break of high/low counts; if False, only close breaks
     
     Returns:
-    - dict with keys: type, level, break_candle, break_index, swing_index, forced (if simulated)
-    - None if no breakout and force_breakout=False
+    - dict with keys: type, level, break_candle, break_index, swing_index, forced
     """
-    
     if len(candles) < 20:
         if debug:
             print("Breakout debug: insufficient candles")
         return None
-    
-    # Find all swing highs and lows
+
     swing_highs = find_swing_highs(candles, left=2, right=2)
     swing_lows = find_swing_lows(candles, left=2, right=2)
-    
+
     if debug:
         print(f"Breakout debug: found {len(swing_highs)} swing highs and {len(swing_lows)} swing lows.")
-    
+
     target_swing = None
     direction_lower = direction.lower()
-    
+
     if direction_lower == 'buy':
-        # Need to break above a swing high
-        # Filter swings that have at least min_bars_after_swing candles after them
         usable_swings = [s for s in swing_highs if len(candles) - s['index'] - 1 >= min_bars_after_swing]
         if usable_swings:
-            # Take the most recent (largest index)
             target_swing = max(usable_swings, key=lambda x: x['index'])
         if debug and target_swing:
             print(f"Breakout debug: target buy swing high at index={target_swing['index']} price={target_swing['level']}")
-            
-    elif direction_lower == 'sell':
-        # Need to break below a swing low
+    else:
         usable_swings = [s for s in swing_lows if len(candles) - s['index'] - 1 >= min_bars_after_swing]
         if usable_swings:
             target_swing = max(usable_swings, key=lambda x: x['index'])
         if debug and target_swing:
             print(f"Breakout debug: target sell swing low at index={target_swing['index']} price={target_swing['level']}")
-    else:
-        if debug:
-            print("Breakout debug: invalid direction")
-        return None
-    
+
     if target_swing is None:
         if debug:
-            print("Breakout debug: no usable swing found (insufficient bars after swing)")
-        # If force_breakout, try to use the most recent swing regardless of bars after
+            print("Breakout debug: no usable swing found")
         if force_breakout:
             if direction_lower == 'buy' and swing_highs:
                 target_swing = max(swing_highs, key=lambda x: x['index'])
-                if debug:
-                    print(f"Breakout debug: FORCING - using most recent swing high at index={target_swing['index']} price={target_swing['level']}")
             elif direction_lower == 'sell' and swing_lows:
                 target_swing = max(swing_lows, key=lambda x: x['index'])
-                if debug:
-                    print(f"Breakout debug: FORCING - using most recent swing low at index={target_swing['index']} price={target_swing['level']}")
         if target_swing is None:
             return None
-    
-    # Check recent candles for breakout
+
     start_idx = max(0, len(candles) - breakout_window)
     breakout_found = False
     break_candle = None
     break_index = None
-    
+
     for i in range(start_idx, len(candles)):
         candle = candles[i]
         if direction_lower == 'buy':
-            if candle['close'] > target_swing['level']:
+            # Check breakout condition
+            if use_wicks:
+                breakout_condition = candle['high'] > target_swing['level']
+            else:
+                breakout_condition = candle['close'] > target_swing['level']
+            if debug:
+                print(f"Breakout debug: candle {i}: high={candle['high']:.5f}, close={candle['close']:.5f} vs swing high {target_swing['level']:.5f}")
+            if breakout_condition:
                 breakout_found = True
                 break_candle = candle
                 break_index = i
                 if debug:
-                    print(f"Breakout debug: candle index={i} close={candle['close']} broke above swing high {target_swing['level']}")
+                    print(f"Breakout debug: candle {i} broke above swing high ({'wick' if candle['high'] > target_swing['level'] and candle['close'] <= target_swing['level'] else 'close'})")
                 break
-            elif debug:
-                print(f"Breakout debug: checking candle index={i} close={candle['close']} against swing high={target_swing['level']}")
         else:  # sell
-            if candle['close'] < target_swing['level']:
+            if use_wicks:
+                breakout_condition = candle['low'] < target_swing['level']
+            else:
+                breakout_condition = candle['close'] < target_swing['level']
+            if debug:
+                print(f"Breakout debug: candle {i}: low={candle['low']:.5f}, close={candle['close']:.5f} vs swing low {target_swing['level']:.5f}")
+            if breakout_condition:
                 breakout_found = True
                 break_candle = candle
                 break_index = i
                 if debug:
-                    print(f"Breakout debug: candle index={i} close={candle['close']} broke below swing low {target_swing['level']}")
+                    print(f"Breakout debug: candle {i} broke below swing low ({'wick' if candle['low'] < target_swing['level'] and candle['close'] >= target_swing['level'] else 'close'})")
                 break
-            elif debug:
-                print(f"Breakout debug: checking candle index={i} close={candle['close']} against swing low={target_swing['level']}")
-    
+
     if breakout_found:
         return {
             'type': direction_lower,
@@ -113,21 +106,13 @@ def detect_breakout(candles, direction, breakout_window=5, min_bars_after_swing=
             'swing_index': target_swing['index'],
             'forced': False
         }
-    
-    # No real breakout - force one if requested
+
     if force_breakout:
         if debug:
-            print(f"Breakout debug: FORCING simulated breakout for debugging. Using target {direction_lower} level={target_swing['level']}")
-        
-        # Use a candle that is NOT the last one, so retest has room to work
-        # Pick a candle 5 positions from the end (or earlier if not enough)
+            print(f"Breakout debug: FORCING simulated breakout.")
         force_index = max(target_swing['index'] + 1, len(candles) - 6)
-        force_index = min(force_index, len(candles) - 2)  # ensure at least 1 candle after
+        force_index = min(force_index, len(candles) - 2)
         break_candle = candles[force_index]
-        
-        if debug:
-            print(f"Breakout debug: forced break at index {force_index} (leaving room for retest)")
-        
         return {
             'type': direction_lower,
             'level': target_swing['level'],
@@ -136,7 +121,7 @@ def detect_breakout(candles, direction, breakout_window=5, min_bars_after_swing=
             'swing_index': target_swing['index'],
             'forced': True
         }
-    
+
     if debug:
-        print("Breakout debug: no candle closed beyond target swing level.")
+        print("Breakout debug: no candle broke target swing level.")
     return None

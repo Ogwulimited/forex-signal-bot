@@ -1,19 +1,23 @@
 """
 Live 5M Scanner - Quantity over Quality
 Scans EURUSD, GBPUSD, USDJPY, AUDUSD every 30 minutes.
-Includes rate limit protection.
 """
 import time
+import os
 from mtf_bias_engine import get_mtf_bias
 from signal_dispatcher import generate_signal
 from telegram_sender import send_telegram_message
 from signal_formatter import format_signal
 from signal_state import should_send_signal, mark_signal_sent
 
-# Configuration
+# Debug: check environment variables
+print(f"DEBUG ENV: BOT_TOKEN present: {bool(os.getenv('BOT_TOKEN'))}")
+print(f"DEBUG ENV: CHAT_ID present: {bool(os.getenv('CHAT_ID'))}")
+print(f"DEBUG ENV: TELEGRAM_BOT_TOKEN present: {bool(os.getenv('TELEGRAM_BOT_TOKEN'))}")
+print(f"DEBUG ENV: TELEGRAM_CHAT_ID present: {bool(os.getenv('TELEGRAM_CHAT_ID'))}")
+
 PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"]
-DELAY_BETWEEN_PAIRS = 25          # Increased to 25s
-DELAY_INSIDE_PAIR = 2             # Small pause between bias and 5M fetch
+DELAY_BETWEEN_PAIRS = 20
 DEBUG = True
 IGNORE_CHOP = True
 FORCE_BREAKOUT = False
@@ -36,8 +40,7 @@ def main():
             print(f"  ❌ No bias data for {pair}")
             continue
         
-        # Small delay to spread out API calls within the pair
-        time.sleep(DELAY_INSIDE_PAIR)
+        time.sleep(1.5)
         
         try:
             signal = generate_signal(

@@ -2,16 +2,15 @@ name: Live 5M Scanner
 
 on:
   schedule:
-    - cron: '*/30 * * * *'   # Runs every 30 minutes
-  workflow_dispatch:          # Allows manual trigger
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
 
 permissions:
-  contents: write             # Required to push state file updates
+  contents: write
 
 jobs:
   run-scanner:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,8 +23,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: |
-          pip install requests
+        run: pip install requests
 
       - name: Run 5M live scanner
         env:
@@ -34,7 +32,7 @@ jobs:
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python live_5m_scanner.py
 
-      - name: Commit state file updates (if any)
+      - name: Commit state file updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

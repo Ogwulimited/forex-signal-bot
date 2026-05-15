@@ -1,65 +1,66 @@
 """
-Retest detector.
-Checks if price returns to the breakout level after a break of structure.
+Retest Detector – Relaxed
+Detects when price returns to a broken level.
+If breakout is too fresh (last 2 candles), assumes a synthetic retest.
 """
 
 def detect_retest(candles, breakout, direction, tolerance_ratio=0.0003, max_retest_bars=10, debug=False):
     """
-    Detect retest of breakout level.
-    
-    Parameters:
-    - candles: list of candle dicts
-    - breakout: dict from breakout_detector (contains 'level')
-    - direction: 'buy' or 'sell'
-    - tolerance_ratio: allowed distance from level as fraction of price
-    - max_retest_bars: how many candles after breakout to check
-    - debug: print logs
+    Find a retest of the breakout level.
     
     Returns:
-    - dict with keys: level, retest_index, candle, or None
+    - dict with 'index', 'candle', or None
     """
-    if not breakout:
+    if breakout is None:
+        if debug:
+            print("Retest: no breakout provided")
         return None
-    
-    breakout_level = breakout['level']
-    break_index = breakout['break_index']
-    tolerance = breakout_level * tolerance_ratio
-    
+
+    breakout_index = breakout.get('break_index')
+    if breakout_index is None:
+        if debug:
+            print("Retest: breakout missing 'break_index'")
+        return None
+
+    level = breakout.get('level')
+    if level is None:
+        if debug:
+            print("Retest: breakout missing 'level'")
+        return None
+
+    tolerance = tolerance_ratio * level
+    end_idx = len(candles) - 1
+
     if debug:
-        print(f"Retest: looking for retest of level {breakout_level} after index {break_index}")
-    
-    # Start checking from the candle after the break candle
-    start = break_index + 1
-    end = min(len(candles), start + max_retest_bars)
-    
-    for i in range(start, end):
-        candle = candles[i]
-        if direction == 'buy':
-            # Retest means price drops back to or below breakout level, then closes above
-            if candle['low'] <= breakout_level + tolerance:
-                # Also need close above level (or at least not far below)
-                if candle['close'] > breakout_level - tolerance:
+        print(f"Retest: looking for retest of level {level:.5f} after index {breakout_index} (tolerance {tolerance:.5f})")
+
+    # Search for real retest
+    start = breakout_index + 1
+    if start <= end_idx:
+        for i in range(start, min(start + max_retest_bars, end_idx + 1)):
+            candle = candles[i]
+            if direction == 'buy':
+                # Buy retest: candle low touches breakout level, close above
+                if candle['low'] <= level + tolerance and candle['close'] > level:
                     if debug:
-                        print(f"Retest: found buy retest at index {i}, low={candle['low']}, close={candle['close']}")
-                    return {
-                        'level': breakout_level,
-                        'retest_index': i,
-                        'candle': candle,
-                        'type': 'buy_retest'
-                    }
-        else:  # sell
-            # Retest means price rises back to or above breakout level, then closes below
-            if candle['high'] >= breakout_level - tolerance:
-                if candle['close'] < breakout_level + tolerance:
+                        print(f"Retest: found buy retest at index {i}, low={candle['low']:.5f} close={candle['close']:.5f}")
+                    return {'index': i, 'candle': candle}
+            else:  # sell
+                if candle['high'] >= level - tolerance and candle['close'] < level:
                     if debug:
-                        print(f"Retest: found sell retest at index {i}, high={candle['high']}, close={candle['close']}")
-                    return {
-                        'level': breakout_level,
-                        'retest_index': i,
-                        'candle': candle,
-                        'type': 'sell_retest'
-                    }
-    
+                        print(f"Retest: found sell retest at index {i}, high={candle['high']:.5f} close={candle['close']:.5f}")
+                    return {'index': i, 'candle': candle}
+
+    # No real retest – if breakout is very fresh, allow synthetic
+    if breakout_index >= len(candles) - 2:
+        if debug:
+            print(f"Retest: no real retest, but breakout too fresh (idx {breakout_index}) – using synthetic retest")
+        return {
+            'index': breakout_index,
+            'candle': candles[breakout_index],
+            'synthetic': True
+        }
+
     if debug:
         print(f"Retest: no retest found within {max_retest_bars} candles after breakout")
     return None

@@ -12,8 +12,8 @@ from liquidity_sweep_detector import detect_liquidity_sweep
 from rr_calculator import calculate_rr
 from chop_filter import is_choppy
 
-PAIRS = ["EURUSD", "GBPUSD"]   # Only 2 pairs to avoid 429
-DELAY_BETWEEN = 30             # seconds
+PAIRS = ["EURUSD", "GBPUSD"]
+DELAY_BETWEEN = 30
 
 def main():
     print("=" * 60)
@@ -39,7 +39,6 @@ def main():
         }
 
         try:
-            # 1. Bias
             bias_data = get_mtf_bias(pair)
             if not bias_data:
                 result["error"] = "No bias data"
@@ -56,23 +55,20 @@ def main():
             result["direction"] = direction
             print(f"  Bias: {bias_data['bias_4h']} | Aligned ✅ | Direction: {direction}")
 
-            # 2. 5M candles
             candles = fetch_candles(pair, interval='5min', outputsize=100)
             if not candles or len(candles) < 30:
                 result["error"] = "Insufficient 5M candles"
                 results.append(result)
                 continue
 
-            # 3. Chop
             if is_choppy(candles, lookback=20, min_range_ratio=0.0005):
                 result["error"] = "Choppy market"
                 results.append(result)
                 print("  Market choppy – skipped")
                 continue
 
-            # 4. Breakout (WITH DEBUG)
             print("  [DEBUG] Breakout search:")
-            breakout = detect_breakout(candles, direction, breakout_window=5, min_bars_after_swing=3, debug=True, force_breakout=False)
+            breakout = detect_breakout(candles, direction, breakout_window=10, min_bars_after_swing=3, debug=True, force_breakout=False)
             if breakout:
                 result["breakout"] = True
                 print(f"  Breakout ✅ (idx {breakout.get('break_index')})")
@@ -81,7 +77,6 @@ def main():
                 results.append(result)
                 continue
 
-            # 5. Retest
             retest = detect_retest(candles, breakout, direction, tolerance_ratio=0.0003, max_retest_bars=10, debug=False)
             if retest:
                 result["retest"] = True
@@ -91,7 +86,6 @@ def main():
                 results.append(result)
                 continue
 
-            # 6. Rejection
             rejection = detect_rejection(candles, direction, retest=retest, breakout=breakout, debug=False)
             if rejection:
                 result["rejection"] = True
@@ -101,7 +95,6 @@ def main():
                 results.append(result)
                 continue
 
-            # 7. Sweep (adaptive)
             sweep = detect_liquidity_sweep(candles, direction, breakout=breakout, retest=retest, lookback=20, debug=False, force_sweep=False, sweep_mode='adaptive')
             if sweep:
                 result["sweep"] = True
@@ -111,7 +104,6 @@ def main():
                 results.append(result)
                 continue
 
-            # 8. RR
             trade = calculate_rr(candles, direction, rejection, sweep, min_rr=1.5, debug=False)
             if trade and trade.get('rr', 0) >= 1.5:
                 result["rr"] = True
@@ -129,11 +121,10 @@ def main():
             results.append(result)
             print(f"  ❌ ERROR: {e}")
 
-        # Delay between pairs
         if pair != PAIRS[-1]:
             time.sleep(DELAY_BETWEEN)
 
-    # ---- SUMMARY ----
+    # ---- SUMMARY (fixed formatting) ----
     print("\n" + "=" * 60)
     print("SUMMARY TABLE")
     print("=" * 60)
@@ -141,7 +132,7 @@ def main():
     print(header)
     print("-" * 60)
     for r in results:
-        bias_str = r.get('bias') if r.get('bias') else '?'
+        bias_str = r.get('bias') or '?'
         print(f"{r['pair']:<10} {bias_str:<10} {'✅' if r['breakout'] else '❌':<5} "
               f"{'✅' if r['retest'] else '❌':<7} {'✅' if r['rejection'] else '❌':<5} "
               f"{'✅' if r['sweep'] else '❌':<6} {'✅' if r['rr'] else '❌':<5} "

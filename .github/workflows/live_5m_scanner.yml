@@ -17,6 +17,23 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Verify secrets
+        run: |
+          if [ -z "${{ secrets.TWELVE_DATA_API_KEY }}" ]; then
+            echo "TWELVE_DATA_API_KEY is empty"
+            exit 1
+          fi
+          if [ -z "${{ secrets.TELEGRAM_BOT_TOKEN }}" ]; then
+            echo "TELEGRAM_BOT_TOKEN is empty"
+            exit 1
+          fi
+          if [ -z "${{ secrets.TELEGRAM_CHAT_ID }}" ]; then
+            echo "TELEGRAM_CHAT_ID is empty"
+            exit 1
+          fi
+          echo "All secrets are set"
+        shell: bash
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

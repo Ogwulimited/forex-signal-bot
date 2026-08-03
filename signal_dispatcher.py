@@ -9,6 +9,7 @@ from rejection_detector import detect_rejection
 from liquidity_sweep_detector import detect_liquidity_sweep
 from chop_filter import is_choppy
 from rr_calculator import calculate_rr
+from trade_logger import log_trade          # <-- NEW
 
 def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=False, force_sweep=False):
     pair = bias_data['pair']
@@ -48,7 +49,7 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
         if debug:
             print("Chop filter bypassed for testing.")
     
-    breakout = detect_breakout(candles, direction, breakout_window=5, min_bars_after_swing=3, debug=debug, force_breakout=force_breakout)
+    breakout = detect_breakout(candles, direction, breakout_window=10, min_bars_after_swing=3, debug=debug, force_breakout=force_breakout)
     if not breakout:
         if debug:
             print("Signal rejected: no breakout detected.")
@@ -93,4 +94,8 @@ def generate_signal(bias_data, debug=False, ignore_chop=False, force_breakout=Fa
     }
     if debug:
         print(f"Signal generated: {signal}")
+
+    # ---- NEW: Log the trade to trades.json ----
+    log_trade(signal, bias_data, breakout, rejection, sweep, direction)
+
     return signal

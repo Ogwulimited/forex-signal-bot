@@ -4,7 +4,7 @@ Periodically checks open trades and updates win/loss status.
 """
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from market_data import fetch_candles
 from telegram_sender import send_telegram_message
 
@@ -26,10 +26,14 @@ def save_trades(trades):
         json.dump(trades, f, indent=2)
 
 def parse_timestamp(ts_str):
-    """Convert ISO timestamp to datetime."""
+    """Convert ISO timestamp string to timezone-aware UTC datetime."""
     try:
-        # Handle 'Z' suffix
-        return datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
+        ts_str = ts_str.replace('Z', '+00:00')
+        dt = datetime.fromisoformat(ts_str)
+        # If naive, assume UTC
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
     except Exception:
         return None
 
@@ -40,18 +44,14 @@ def check_trade(trade, candles, direction):
     """
     tp = trade['tp']
     sl = trade['sl']
-    entry = trade['entry']
 
     for candle in candles:
         high = candle['high']
         low = candle['low']
-        close = candle['close']
 
         if direction == 'buy':
-            # TP hit?
             if high >= tp:
                 return "win", tp, f"TP reached (high {high:.5f})"
-            # SL hit?
             if low <= sl:
                 return "loss", sl, f"SL hit (low {low:.5f})"
         else:  # sell
@@ -60,19 +60,18 @@ def check_trade(trade, candles, direction):
             if high >= sl:
                 return "loss", sl, f"SL hit (high {high:.5f})"
 
-    # No trigger found – check if price moved beyond levels without being captured
-    # Use last candle's close to infer
+    # Inference: if last candle's close is beyond level, consider it hit
     last_close = candles[-1]['close']
     if direction == 'buy':
         if last_close >= tp:
-            return "win", tp, "price beyond TP (inferred)"
+            return "win", tp, "Price beyond TP (inferred)"
         if last_close <= sl:
-            return "loss", sl, "price beyond SL (inferred)"
+            return "loss", sl, "Price beyond SL (inferred)"
     else:
         if last_close <= tp:
-            return "win", tp, "price beyond TP (inferred)"
+            return "win", tp, "Price beyond TP (inferred)"
         if last_close >= sl:
-            return "loss", sl, "price beyond SL (inferred)"
+            return "loss", sl, "Price beyond SL (inferred)"
 
     return None, None, None
 
@@ -120,7 +119,6 @@ def main():
             print(f"Skipping {pair} – no candles")
             continue
 
-        # Expire very old trades
         opened = parse_timestamp(trade['timestamp'])
         if opened:
             age_hours = (now - opened).total_seconds() / 3600
@@ -130,8 +128,8 @@ def main():
                 trade['exit_time'] = now.isoformat()
                 print(f"Trade {trade['id']} expired")
                 updated = True
-                # Send message?
-                message = f"⏰ {pair} {direction.upper()} EXPIRED | Duration: {format_duration(opened, now)} | RR: {trade['rr']}"
+                dur = format_duration(opened, now)
+                message = f"⏰ {pair} {direction.upper()} EXPIRED | Duration: {dur} | RR: {trade['rr']}"
                 send_telegram_message(message)
                 continue
 
@@ -144,7 +142,6 @@ def main():
             trade['exit_time'] = now.isoformat()
             updated = True
 
-            # Calculate R-multiple
             entry = trade['entry']
             sl = trade['sl']
             risk = abs(entry - sl)
@@ -152,10 +149,7 @@ def main():
             r_multiple = reward / risk if risk > 0 else 0
             trade['r_multiple'] = round(r_multiple, 2)
 
-            # Duration
             dur = format_duration(opened, now) if opened else "unknown"
-
-            # Emoji
             emoji = "✅" if status == "win" else "❌"
             message = (
                 f"{emoji} {pair} {direction.upper()} {status.upper()}\n"

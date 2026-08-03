@@ -1,0 +1,27 @@
+[
+  {
+    "id": "AUDUSD_sell_20260803_203823",
+    "pair": "AUDUSD",
+    "direction": "sell",
+    "entry": 0.69993,
+    "sl": 0.70001,
+    "tp": 0.69977,
+    "rr": 2.000000000001388,
+    "timeframe": "5M",
+    "timestamp": "2026-08-03T20:38:23.698083",
+    "session": "Other",
+    "day_of_week": "Monday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 98,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
+  }
+]

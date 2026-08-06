@@ -168,5 +168,30 @@
       "sweep_forced": false
     },
     "status": "open"
+  },
+  {
+    "id": "USDJPY_buy_20260806_092458",
+    "pair": "USDJPY",
+    "direction": "buy",
+    "entry": 157.86499,
+    "sl": 157.82916,
+    "tp": 157.93665000000001,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-06T09:24:58.528897",
+    "session": "London",
+    "day_of_week": "Thursday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 90,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

@@ -143,5 +143,30 @@
     "exit_reason": "SL hit (low 1.15539)",
     "exit_time": "2026-08-06T00:04:52.331367+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "USDJPY_buy_20260806_062948",
+    "pair": "USDJPY",
+    "direction": "buy",
+    "entry": 157.81652,
+    "sl": 157.75738,
+    "tp": 157.93479999999997,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-06T06:29:48.448301",
+    "session": "Asian",
+    "day_of_week": "Thursday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 5,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 96,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

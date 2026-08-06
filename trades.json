@@ -167,7 +167,11 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "win",
+    "exit_price": 157.93479999999997,
+    "exit_reason": "TP reached (high 157.93951)",
+    "exit_time": "2026-08-06T11:33:43.759715+00:00",
+    "r_multiple": 2.0
   },
   {
     "id": "USDJPY_buy_20260806_092458",
@@ -192,6 +196,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "win",
+    "exit_price": 157.93665000000001,
+    "exit_reason": "TP reached (high 157.93951)",
+    "exit_time": "2026-08-06T11:33:43.759715+00:00",
+    "r_multiple": 2.0
   }
 ]

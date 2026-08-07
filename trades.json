@@ -283,7 +283,11 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 1.15607,
+    "exit_reason": "SL hit (low 1.15572)",
+    "exit_time": "2026-08-07T17:33:42.604360+00:00",
+    "r_multiple": 1.0
   },
   {
     "id": "GBPUSD_buy_20260807_165341",
@@ -308,6 +312,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 1.34973,
+    "exit_reason": "SL hit (low 1.34934)",
+    "exit_time": "2026-08-07T17:33:42.604360+00:00",
+    "r_multiple": 1.0
   }
 ]

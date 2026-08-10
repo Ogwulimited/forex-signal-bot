@@ -515,7 +515,11 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 1.35027,
+    "exit_reason": "SL hit (low 1.35015)",
+    "exit_time": "2026-08-10T09:57:39.434191+00:00",
+    "r_multiple": 1.0
   },
   {
     "id": "USDJPY_buy_20260810_092002",
@@ -540,6 +544,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 158.48907,
+    "exit_reason": "SL hit (low 158.47081)",
+    "exit_time": "2026-08-10T09:57:39.434191+00:00",
+    "r_multiple": 1.0
   }
 ]

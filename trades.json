@@ -694,5 +694,55 @@
     "exit_reason": "SL hit (low 1.35063)",
     "exit_time": "2026-08-10T23:34:06.589407+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "USDJPY_buy_20260811_023513",
+    "pair": "USDJPY",
+    "direction": "buy",
+    "entry": 159.26857,
+    "sl": 159.13662,
+    "tp": 159.53247000000005,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-11T02:35:13.556818",
+    "session": "Asian",
+    "day_of_week": "Tuesday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 92,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
+  },
+  {
+    "id": "AUDUSD_sell_20260811_023536",
+    "pair": "AUDUSD",
+    "direction": "sell",
+    "entry": 0.70559,
+    "sl": 0.70583,
+    "tp": 0.7051100000000002,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-11T02:35:36.135429",
+    "session": "Asian",
+    "day_of_week": "Tuesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 97,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

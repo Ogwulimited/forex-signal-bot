@@ -810,5 +810,30 @@
     "exit_reason": "SL hit (low 159.39720)",
     "exit_time": "2026-08-12T04:28:27.746263+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "EURUSD_sell_20260812_055437",
+    "pair": "EURUSD",
+    "direction": "sell",
+    "entry": 1.15322,
+    "sl": 1.15348,
+    "tp": 1.1526999999999996,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-12T05:54:37.869533",
+    "session": "Asian",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 3,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 92,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

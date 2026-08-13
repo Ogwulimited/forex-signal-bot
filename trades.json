@@ -868,5 +868,30 @@
     "exit_reason": "TP reached (high 1.35288)",
     "exit_time": "2026-08-12T13:35:47.763140+00:00",
     "r_multiple": 2.11
+  },
+  {
+    "id": "EURUSD_sell_20260813_015405",
+    "pair": "EURUSD",
+    "direction": "sell",
+    "entry": 1.1526,
+    "sl": 1.1529,
+    "tp": 1.1520000000000001,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-13T01:54:05.541118",
+    "session": "Asian",
+    "day_of_week": "Thursday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 4,
+    "strength_1h": 3,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 98,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

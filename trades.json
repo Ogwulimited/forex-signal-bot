@@ -1071,5 +1071,30 @@
     "exit_reason": "SL hit (low 0.70801)",
     "exit_time": "2026-08-14T19:37:25.609421+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "EURUSD_buy_20260815_132904",
+    "pair": "EURUSD",
+    "direction": "buy",
+    "entry": 1.15697,
+    "sl": 1.15662,
+    "tp": 1.1576700000000002,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-15T13:29:04.183100",
+    "session": "London",
+    "day_of_week": "Saturday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 98,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

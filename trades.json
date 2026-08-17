@@ -1245,5 +1245,30 @@
     "exit_reason": "TP reached (high 1.15961)",
     "exit_time": "2026-08-17T11:59:43.320174+00:00",
     "r_multiple": 2.5
+  },
+  {
+    "id": "GBPUSD_buy_20260817_142557",
+    "pair": "GBPUSD",
+    "direction": "buy",
+    "entry": 1.35683,
+    "sl": 1.35636,
+    "tp": 1.35777,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-17T14:25:57.471156",
+    "session": "London",
+    "day_of_week": "Monday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 98,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

@@ -1356,6 +1356,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 159.46187,
+    "exit_reason": "SL hit (low 159.35792)",
+    "exit_time": "2026-08-17T18:44:18.095878+00:00",
+    "r_multiple": 1.0
   }
 ]

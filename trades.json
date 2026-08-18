@@ -1390,5 +1390,30 @@
     "exit_reason": "TP reached (high 159.75043)",
     "exit_time": "2026-08-18T05:57:29.901663+00:00",
     "r_multiple": 3.15
+  },
+  {
+    "id": "USDJPY_buy_20260818_064336",
+    "pair": "USDJPY",
+    "direction": "buy",
+    "entry": 159.76876,
+    "sl": 159.71564,
+    "tp": 159.87499999999994,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-18T06:43:36.668395",
+    "session": "Asian",
+    "day_of_week": "Tuesday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 4,
+    "strength_1h": 5,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 98,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

@@ -1705,5 +1705,30 @@
     "exit_reason": "SL hit (low 1.16717)",
     "exit_time": "2026-08-19T21:24:05.790864+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "EURUSD_buy_20260819_225027",
+    "pair": "EURUSD",
+    "direction": "buy",
+    "entry": 1.16776,
+    "sl": 1.16762,
+    "tp": 1.16807,
+    "rr": 2.214285714289,
+    "timeframe": "5M",
+    "timestamp": "2026-08-19T22:50:27.408479",
+    "session": "Other",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 4,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 90,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

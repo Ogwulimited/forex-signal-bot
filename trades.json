@@ -1593,5 +1593,80 @@
     "exit_reason": "SL hit (low 1.35526)",
     "exit_time": "2026-08-19T13:32:20.912948+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "EURUSD_buy_20260819_192328",
+    "pair": "EURUSD",
+    "direction": "buy",
+    "entry": 1.16767,
+    "sl": 1.16728,
+    "tp": 1.1684499999999998,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-19T19:23:28.810571",
+    "session": "New York",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 4,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 94,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
+  },
+  {
+    "id": "GBPUSD_buy_20260819_192351",
+    "pair": "GBPUSD",
+    "direction": "buy",
+    "entry": 1.36082,
+    "sl": 1.36005,
+    "tp": 1.3623599999999998,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-19T19:23:51.200182",
+    "session": "New York",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 4,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 91,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
+  },
+  {
+    "id": "USDJPY_sell_20260819_192413",
+    "pair": "USDJPY",
+    "direction": "sell",
+    "entry": 158.27138,
+    "sl": 158.30949,
+    "tp": 158.19515999999996,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-19T19:24:13.810829",
+    "session": "New York",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 97,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

@@ -1676,5 +1676,30 @@
     "exit_reason": "SL hit (high 158.33678)",
     "exit_time": "2026-08-19T20:26:25.169451+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "EURUSD_buy_20260819_205403",
+    "pair": "EURUSD",
+    "direction": "buy",
+    "entry": 1.16791,
+    "sl": 1.16776,
+    "tp": 1.1682100000000002,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-19T20:54:03.372943",
+    "session": "Other",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 4,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 97,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

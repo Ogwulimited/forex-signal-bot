@@ -2057,5 +2057,30 @@
     "exit_reason": "SL hit (low 0.71615)",
     "exit_time": "2026-08-21T12:02:19.890296+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "USDJPY_sell_20260821_124424",
+    "pair": "USDJPY",
+    "direction": "sell",
+    "entry": 158.76163,
+    "sl": 158.84342,
+    "tp": 158.59804999999997,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-21T12:44:24.652788",
+    "session": "London",
+    "day_of_week": "Friday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 3,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 91,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

@@ -1936,7 +1936,11 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 1.16951,
+    "exit_reason": "SL hit (low 1.16913)",
+    "exit_time": "2026-08-21T09:07:19.158221+00:00",
+    "r_multiple": 1.0
   },
   {
     "id": "GBPUSD_buy_20260821_083900",
@@ -1961,7 +1965,11 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 1.36405,
+    "exit_reason": "SL hit (low 1.36398)",
+    "exit_time": "2026-08-21T09:07:19.158221+00:00",
+    "r_multiple": 1.0
   },
   {
     "id": "AUDUSD_buy_20260821_083943",
@@ -1986,6 +1994,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 0.71487,
+    "exit_reason": "SL hit (low 0.71457)",
+    "exit_time": "2026-08-21T09:07:19.158221+00:00",
+    "r_multiple": 1.0
   }
 ]

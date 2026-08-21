@@ -2028,5 +2028,30 @@
     "exit_reason": "SL hit (low 1.17032)",
     "exit_time": "2026-08-21T10:59:49.742897+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "AUDUSD_buy_20260821_113426",
+    "pair": "AUDUSD",
+    "direction": "buy",
+    "entry": 0.71668,
+    "sl": 0.71629,
+    "tp": 0.71746,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-21T11:34:26.278096",
+    "session": "London",
+    "day_of_week": "Friday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 5,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 98,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

@@ -2081,6 +2081,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "win",
+    "exit_price": 158.59804999999997,
+    "exit_reason": "TP reached (low 158.55671)",
+    "exit_time": "2026-08-21T13:10:29.904918+00:00",
+    "r_multiple": 2.0
   }
 ]

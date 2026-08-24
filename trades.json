@@ -2086,5 +2086,30 @@
     "exit_reason": "TP reached (low 158.55671)",
     "exit_time": "2026-08-21T13:10:29.904918+00:00",
     "r_multiple": 2.0
+  },
+  {
+    "id": "AUDUSD_sell_20260824_173040",
+    "pair": "AUDUSD",
+    "direction": "sell",
+    "entry": 0.71496,
+    "sl": 0.71515,
+    "tp": 0.71437,
+    "rr": 3.1052631578966436,
+    "timeframe": "5M",
+    "timestamp": "2026-08-24T17:30:40.467155",
+    "session": "New York",
+    "day_of_week": "Monday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 5,
+    "strength_1h": 5,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 90,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

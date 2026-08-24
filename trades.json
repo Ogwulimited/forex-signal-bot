@@ -2110,7 +2110,11 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 0.71515,
+    "exit_reason": "SL hit (high 0.71524)",
+    "exit_time": "2026-08-24T18:03:58.930763+00:00",
+    "r_multiple": 1.0
   },
   {
     "id": "AUDUSD_sell_20260824_180140",
@@ -2135,6 +2139,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 0.71446,
+    "exit_reason": "SL hit (high 0.71524)",
+    "exit_time": "2026-08-24T18:03:58.930763+00:00",
+    "r_multiple": 1.0
   }
 ]

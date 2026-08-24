@@ -2111,5 +2111,30 @@
       "sweep_forced": false
     },
     "status": "open"
+  },
+  {
+    "id": "AUDUSD_sell_20260824_180140",
+    "pair": "AUDUSD",
+    "direction": "sell",
+    "entry": 0.71407,
+    "sl": 0.71446,
+    "tp": 0.71329,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-24T18:01:40.074793",
+    "session": "New York",
+    "day_of_week": "Monday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 5,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 95,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

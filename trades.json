@@ -2144,5 +2144,55 @@
     "exit_reason": "SL hit (high 0.71524)",
     "exit_time": "2026-08-24T18:03:58.930763+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "EURUSD_sell_20260825_043709",
+    "pair": "EURUSD",
+    "direction": "sell",
+    "entry": 1.16569,
+    "sl": 1.16597,
+    "tp": 1.1651299999999998,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-25T04:37:09.004915",
+    "session": "Asian",
+    "day_of_week": "Tuesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 4,
+    "strength_1h": 3,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 93,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
+  },
+  {
+    "id": "AUDUSD_sell_20260825_043815",
+    "pair": "AUDUSD",
+    "direction": "sell",
+    "entry": 0.7148,
+    "sl": 0.71522,
+    "tp": 0.71396,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-25T04:38:15.149731",
+    "session": "Asian",
+    "day_of_week": "Tuesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 3,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 91,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

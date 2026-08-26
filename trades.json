@@ -2405,5 +2405,55 @@
     "exit_reason": "SL hit (high 1.36356)",
     "exit_time": "2026-08-26T07:59:05.222088+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "GBPUSD_sell_20260826_115819",
+    "pair": "GBPUSD",
+    "direction": "sell",
+    "entry": 1.36264,
+    "sl": 1.36281,
+    "tp": 1.36214,
+    "rr": 2.9411764705891574,
+    "timeframe": "5M",
+    "timestamp": "2026-08-26T11:58:19.428075",
+    "session": "London",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 3,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 90,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
+  },
+  {
+    "id": "AUDUSD_buy_20260826_115903",
+    "pair": "AUDUSD",
+    "direction": "buy",
+    "entry": 0.71831,
+    "sl": 0.71817,
+    "tp": 0.7185900000000001,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-08-26T11:59:03.807716",
+    "session": "London",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 95,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

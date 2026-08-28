@@ -2632,7 +2632,11 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 159.56879,
+    "exit_reason": "SL hit (low 159.53829)",
+    "exit_time": "2026-08-28T09:49:18.910936+00:00",
+    "r_multiple": 1.0
   },
   {
     "id": "AUDUSD_buy_20260828_094655",
@@ -2657,6 +2661,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "loss",
+    "exit_price": 0.71949,
+    "exit_reason": "SL hit (low 0.71937)",
+    "exit_time": "2026-08-28T09:49:18.910936+00:00",
+    "r_multiple": 1.0
   }
 ]

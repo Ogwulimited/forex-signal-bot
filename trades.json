@@ -2811,5 +2811,30 @@
     "exit_reason": "SL hit (low 160.16669)",
     "exit_time": "2026-09-02T01:01:24.559859+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "GBPUSD_sell_20260902_095032",
+    "pair": "GBPUSD",
+    "direction": "sell",
+    "entry": 1.34925,
+    "sl": 1.35023,
+    "tp": 1.34729,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-09-02T09:50:32.686682",
+    "session": "London",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 94,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

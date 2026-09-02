@@ -2753,5 +2753,55 @@
     "exit_reason": "SL hit (low 160.15415)",
     "exit_time": "2026-09-01T23:02:43.155127+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "GBPUSD_sell_20260902_005009",
+    "pair": "GBPUSD",
+    "direction": "sell",
+    "entry": 1.351,
+    "sl": 1.35152,
+    "tp": 1.3499599999999998,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-09-02T00:50:09.808690",
+    "session": "Asian",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 90,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
+  },
+  {
+    "id": "USDJPY_buy_20260902_005032",
+    "pair": "USDJPY",
+    "direction": "buy",
+    "entry": 160.22011,
+    "sl": 160.18498,
+    "tp": 160.29037000000002,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-09-02T00:50:32.418158",
+    "session": "Asian",
+    "day_of_week": "Wednesday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 92,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

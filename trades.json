@@ -2869,5 +2869,30 @@
     "exit_reason": "TP reached (low 156.37450)",
     "exit_time": "2026-09-03T11:16:41.770372+00:00",
     "r_multiple": 2.0
+  },
+  {
+    "id": "AUDUSD_buy_20260903_113204",
+    "pair": "AUDUSD",
+    "direction": "buy",
+    "entry": 0.71965,
+    "sl": 0.71886,
+    "tp": 0.7212299999999999,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-09-03T11:32:04.597604",
+    "session": "London",
+    "day_of_week": "Thursday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 4,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 95,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

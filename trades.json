@@ -2927,5 +2927,55 @@
     "exit_reason": "SL hit (low 0.72016)",
     "exit_time": "2026-09-03T21:20:56.176695+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "EURUSD_buy_20260903_234730",
+    "pair": "EURUSD",
+    "direction": "buy",
+    "entry": 1.16268,
+    "sl": 1.16249,
+    "tp": 1.1630599999999998,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-09-03T23:47:30.183965",
+    "session": "Other",
+    "day_of_week": "Thursday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 3,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 95,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
+  },
+  {
+    "id": "USDJPY_sell_20260903_234813",
+    "pair": "USDJPY",
+    "direction": "sell",
+    "entry": 155.97904,
+    "sl": 156.04947,
+    "tp": 155.79493,
+    "rr": 2.6140849069993215,
+    "timeframe": "5M",
+    "timestamp": "2026-09-03T23:48:13.797990",
+    "session": "Other",
+    "day_of_week": "Thursday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 4,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 94,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

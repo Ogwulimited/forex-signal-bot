@@ -2985,5 +2985,30 @@
     "exit_reason": "TP reached (low 155.79493)",
     "exit_time": "2026-09-04T01:09:56.320816+00:00",
     "r_multiple": 2.61
+  },
+  {
+    "id": "EURUSD_buy_20260907_083321",
+    "pair": "EURUSD",
+    "direction": "buy",
+    "entry": 1.16338,
+    "sl": 1.16158,
+    "tp": 1.1669800000000001,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-09-07T08:33:21.497724",
+    "session": "London",
+    "day_of_week": "Monday",
+    "bias_4h": "bullish",
+    "bias_1h": "bullish",
+    "strength_4h": 3,
+    "strength_1h": 3,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 91,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

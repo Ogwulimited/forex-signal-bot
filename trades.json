@@ -3010,5 +3010,30 @@
       "sweep_forced": false
     },
     "status": "open"
+  },
+  {
+    "id": "USDJPY_sell_20260907_144942",
+    "pair": "USDJPY",
+    "direction": "sell",
+    "entry": 154.29838,
+    "sl": 154.39765,
+    "tp": 154.09984000000003,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-09-07T14:49:42.288454",
+    "session": "London",
+    "day_of_week": "Monday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 4,
+    "strength_1h": 4,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 97,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

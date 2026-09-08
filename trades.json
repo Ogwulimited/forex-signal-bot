@@ -3039,5 +3039,30 @@
     "exit_reason": "SL hit (high 154.45943)",
     "exit_time": "2026-09-07T16:04:23.964880+00:00",
     "r_multiple": 1.0
+  },
+  {
+    "id": "USDJPY_sell_20260908_003636",
+    "pair": "USDJPY",
+    "direction": "sell",
+    "entry": 153.53754,
+    "sl": 153.74798,
+    "tp": 153.11666,
+    "rr": 2.0,
+    "timeframe": "5M",
+    "timestamp": "2026-09-08T00:36:36.217557",
+    "session": "Asian",
+    "day_of_week": "Tuesday",
+    "bias_4h": "bearish",
+    "bias_1h": "bearish",
+    "strength_4h": 4,
+    "strength_1h": 5,
+    "setup_features": {
+      "breakout_type": "swing",
+      "breakout_index": 95,
+      "rejection_wick_ratio": null,
+      "sweep_mode": "adaptive",
+      "sweep_forced": false
+    },
+    "status": "open"
   }
 ]

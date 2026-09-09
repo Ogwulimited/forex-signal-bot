@@ -3096,6 +3096,10 @@
       "sweep_mode": "adaptive",
       "sweep_forced": false
     },
-    "status": "open"
+    "status": "win",
+    "exit_price": 0.72332,
+    "exit_reason": "TP reached (high 0.72335)",
+    "exit_time": "2026-09-09T06:24:13.697657+00:00",
+    "r_multiple": 2.0
   }
 ]

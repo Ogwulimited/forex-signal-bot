@@ -1,13 +1,12 @@
 """
-Market Data Module – Deriv API (New v1 Public Endpoint)
-Fetches historical candles via Deriv's public WebSocket API.
-No App ID or authentication required for market data.
+Market Data Module – Powered by Deriv API
+Drop-in replacement for the Twelve Data version.
+All other modules (mtf_bias_engine, detectors, etc.) will work unchanged.
 """
 import json
 import time
 import websocket
 
-# New public WebSocket endpoint – no app_id needed
 WS_URL = "wss://api.derivws.com/trading/v1/options/ws/public"
 
 SYMBOL_MAP = {
@@ -21,6 +20,8 @@ SYMBOL_MAP = {
     "CADJPY": "frxCADJPY", "CHFJPY": "frxCHFJPY", "USDTRY": "frxUSDTRY",
     "USDZAR": "frxUSDZAR", "USDMXN": "frxUSDMXN", "USDNOK": "frxUSDNOK",
     "USDSEK": "frxUSDSEK", "USDSGD": "frxUSDSGD", "USDPLN": "frxUSDPLN",
+    "EURNZD": "frxEURNZD", "GBPNZD": "frxGBPNZD", "CADCHF": "frxCADCHF",
+    "NZDCAD": "frxNZDCAD", "NZDCHF": "frxNZDCHF", "GBPSEK": "frxGBPSEK",
 }
 
 TIMEFRAME_MAP = {
@@ -31,7 +32,8 @@ TIMEFRAME_MAP = {
 def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
     """
     Fetch historical candles from Deriv's public WebSocket API.
-    Returns list of dicts: {'datetime', 'open', 'high', 'low', 'close'} or [].
+    Returns list of dicts: {'datetime','open','high','low','close'} or [].
+    Compatible with all existing modules.
     """
     symbol = SYMBOL_MAP.get(pair.upper())
     if not symbol:
@@ -56,10 +58,8 @@ def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
                 "style": "candles",
                 "granularity": granularity,
             }
-
             ws.send(json.dumps(request))
 
-            # Read up to 5 messages looking for 'candles'
             for _ in range(5):
                 raw = ws.recv()
                 response = json.loads(raw)

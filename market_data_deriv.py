@@ -1,13 +1,14 @@
 """
-Market Data Module – Deriv API
-Fetches historical candles via Deriv WebSocket API.
+Market Data Module – Deriv API (New v1 Public Endpoint)
+Fetches historical candles via Deriv's public WebSocket API.
+No App ID or authentication required for market data.
 """
 import json
 import time
 import websocket
 
-APP_ID = "34oBErgmD01y1ojvGehWy"
-WS_URL = f"wss://ws.derivws.com/websockets/v3?app_id={APP_ID}"
+# New public WebSocket endpoint – no app_id needed
+WS_URL = "wss://api.derivws.com/trading/v1/options/ws/public"
 
 SYMBOL_MAP = {
     "EURUSD": "frxEURUSD", "GBPUSD": "frxGBPUSD", "USDJPY": "frxUSDJPY",
@@ -29,7 +30,7 @@ TIMEFRAME_MAP = {
 
 def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
     """
-    Fetch historical candles from Deriv.
+    Fetch historical candles from Deriv's public WebSocket API.
     Returns list of dicts: {'datetime', 'open', 'high', 'low', 'close'} or [].
     """
     symbol = SYMBOL_MAP.get(pair.upper())
@@ -45,6 +46,7 @@ def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
     for attempt in range(retries):
         try:
             ws = websocket.create_connection(WS_URL, timeout=15)
+
             request = {
                 "ticks_history": symbol,
                 "adjust_start_time": 1,
@@ -54,11 +56,14 @@ def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
                 "style": "candles",
                 "granularity": granularity,
             }
+
             ws.send(json.dumps(request))
 
+            # Read up to 5 messages looking for 'candles'
             for _ in range(5):
                 raw = ws.recv()
                 response = json.loads(raw)
+
                 if "candles" in response:
                     ws.close()
                     return [
@@ -71,11 +76,14 @@ def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
                         }
                         for c in response["candles"]
                     ]
+
                 if "error" in response:
                     print(f"Deriv error for {pair}: {response['error'].get('message')}")
                     ws.close()
                     return []
+
             ws.close()
+
         except Exception as e:
             print(f"Attempt {attempt+1} failed for {pair}: {e}")
             time.sleep(2)

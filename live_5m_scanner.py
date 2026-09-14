@@ -1,6 +1,6 @@
 """
 Live 5M Scanner - Quantity over Quality
-Scans EURUSD, GBPUSD, USDJPY, AUDUSD every 30 minutes.
+Scans EURUSD, GBPUSD, USDJPY, AUDUSD, USDCAD, USDCHF, NZDUSD, EURGBP,nEURJPY, GBPJPY, AUDJPY, EURAUD every 30 minutes.
 """
 import time
 import os
@@ -16,7 +16,10 @@ print(f"DEBUG ENV: CHAT_ID present: {bool(os.getenv('CHAT_ID'))}")
 print(f"DEBUG ENV: TELEGRAM_BOT_TOKEN present: {bool(os.getenv('TELEGRAM_BOT_TOKEN'))}")
 print(f"DEBUG ENV: TELEGRAM_CHAT_ID present: {bool(os.getenv('TELEGRAM_CHAT_ID'))}")
 
-PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"]
+PAIRS = [
+    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF",
+    "NZDUSD", "EURGBP", "EURJPY", "GBPJPY", "AUDJPY", "EURAUD",
+]
 DELAY_BETWEEN_PAIRS = 20
 DEBUG = True
 IGNORE_CHOP = False

@@ -1,6 +1,6 @@
 # Backtest Report — Funnel + Expectancy
 
-Generated: 2026-09-15T21:17:57.722403+00:00  
+Generated: 2026-09-15T21:32:18.478922+00:00  
 History window: last 3 months  
 Pairs tested: 15  
 Scan cadence: every 5th 5M candle (~every 25 min)  
@@ -11,16 +11,16 @@ Cooldown between signals: 48 bars (~4.0h)
 
 | Stage | Count | % of scan points |
 |-------|------:|-----------------:|
-| HTF not aligned | 845 | 63.68% |
-| Outside London/NY session | 99 | 7.46% |
-| Chop filter rejected | 7 | 0.53% |
-| No swing breakout | 278 | 20.95% |
-| No real retest | 40 | 3.01% |
-| No rejection candle | 33 | 2.49% |
-| No liquidity sweep | 24 | 1.81% |
+| HTF not aligned | 856 | 63.83% |
+| Outside London/NY session | 102 | 7.61% |
+| Chop filter rejected | 7 | 0.52% |
+| No swing breakout | 278 | 20.73% |
+| No real retest | 40 | 2.98% |
+| No rejection candle | 33 | 2.46% |
+| No liquidity sweep | 24 | 1.79% |
 | RR below minimum | 0 | 0.00% |
-| SIGNAL (all stages passed) | 1 | 0.08% |
-| **Total scan points** | **1327** | 100% |
+| SIGNAL (all stages passed) | 1 | 0.07% |
+| **Total scan points** | **1341** | 100% |
 
 ## Expectancy Summary
 
@@ -28,11 +28,11 @@ Cooldown between signals: 48 bars (~4.0h)
 - Signals per month: **0.33** across 15 pairs
 - Wins: **0**  |  Losses: **0**  |  Expired: **1**
 - Win rate: **0.0%**
-- Average R per trade: **0.12R**
-- Total R over 3 months: **0.12R**
-- Average hold time: **50.0 bars** (~4.2h)
+- Average R per trade: **0.14R**
+- Total R over 3 months: **0.14R**
+- Average hold time: **53.0 bars** (~4.4h)
 
-**Monthly expectancy (R): 0.04R**
+**Monthly expectancy (R): 0.05R**
 
 ## Per-Pair Results
 
@@ -52,24 +52,24 @@ Cooldown between signals: 48 bars (~4.0h)
 | NZDUSD | 0 | 0 | 0 | 0.0% | 0.0R |
 | USDCAD | 0 | 0 | 0 | 0.0% | 0.0R |
 | USDCHF | 0 | 0 | 0 | 0.0% | 0.0R |
-| USDJPY | 1 | 0 | 0 | 0.0% | 0.12R |
+| USDJPY | 1 | 0 | 0 | 0.0% | 0.14R |
 
 ## All Signals (Chronological)
 
 | Date | Pair | Dir | Entry | SL | TP | RR | Outcome | Bars | R |
 |------|------|-----|------:|----:|----:|----:|---------|-----:|---:|
-| 2026-09-15 17:15 | USDJPY | buy | 155.12700 | 155.03400 | 155.31300 | 2.00 | expired | 50 | +0.00 |
+| 2026-09-15 17:15 | USDJPY | buy | 155.12700 | 155.03400 | 155.31300 | 2.00 | expired | 53 | +0.00 |
 
 ## Bottleneck Analysis
 
-Aligned candidates: **482**
+Aligned candidates: **485**
 
 | Filter | Rejections | % of candidates |
 |--------|-----------:|----------------:|
-| Session | 99 | 20.5% |
-| Chop | 7 | 1.5% |
-| Breakout | 278 | 57.7% |
-| Retest | 40 | 8.3% |
+| Session | 102 | 21.0% |
+| Chop | 7 | 1.4% |
+| Breakout | 278 | 57.3% |
+| Retest | 40 | 8.2% |
 | Rejection | 33 | 6.8% |
-| Sweep | 24 | 5.0% |
+| Sweep | 24 | 4.9% |
 | RR | 0 | 0.0% |

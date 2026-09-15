@@ -1,75 +1,93 @@
 # Backtest Report — Funnel + Expectancy
 
-Generated: 2026-09-15T21:32:18.478922+00:00  
+Generated: 2026-09-15T21:39:49.391135+00:00  
 History window: last 3 months  
 Pairs tested: 15  
 Scan cadence: every 5th 5M candle (~every 25 min)  
-Sweep mode: **strict**  
+Sweep mode: **force**  
 Cooldown between signals: 48 bars (~4.0h)
 
 ## Aggregate Funnel
 
 | Stage | Count | % of scan points |
 |-------|------:|-----------------:|
-| HTF not aligned | 856 | 63.83% |
-| Outside London/NY session | 102 | 7.61% |
-| Chop filter rejected | 7 | 0.52% |
-| No swing breakout | 278 | 20.73% |
-| No real retest | 40 | 2.98% |
-| No rejection candle | 33 | 2.46% |
-| No liquidity sweep | 24 | 1.79% |
+| HTF not aligned | 827 | 69.73% |
+| Outside London/NY session | 93 | 7.84% |
+| Chop filter rejected | 5 | 0.42% |
+| No swing breakout | 181 | 15.26% |
+| No real retest | 30 | 2.53% |
+| No rejection candle | 31 | 2.61% |
+| No liquidity sweep | 0 | 0.00% |
 | RR below minimum | 0 | 0.00% |
-| SIGNAL (all stages passed) | 1 | 0.07% |
-| **Total scan points** | **1341** | 100% |
+| SIGNAL (all stages passed) | 19 | 1.60% |
+| **Total scan points** | **1186** | 100% |
 
 ## Expectancy Summary
 
-- Total signals: **1**
-- Signals per month: **0.33** across 15 pairs
-- Wins: **0**  |  Losses: **0**  |  Expired: **1**
-- Win rate: **0.0%**
-- Average R per trade: **0.14R**
-- Total R over 3 months: **0.14R**
-- Average hold time: **53.0 bars** (~4.4h)
+- Total signals: **19**
+- Signals per month: **6.33** across 15 pairs
+- Wins: **8**  |  Losses: **11**  |  Expired: **0**
+- Win rate: **42.1%**
+- Average R per trade: **0.27R**
+- Total R over 3 months: **5.09R**
+- Average hold time: **4.0 bars** (~0.3h)
 
-**Monthly expectancy (R): 0.05R**
+**Monthly expectancy (R): 1.70R**
 
 ## Per-Pair Results
 
 | Pair | Signals | Wins | Losses | Win% | Total R |
 |------|--------:|-----:|-------:|-----:|--------:|
 | AUDJPY | 0 | 0 | 0 | 0.0% | 0.0R |
-| AUDUSD | 0 | 0 | 0 | 0.0% | 0.0R |
+| AUDUSD | 1 | 0 | 1 | 0.0% | -1.0R |
 | CADJPY | 0 | 0 | 0 | 0.0% | 0.0R |
 | CHFJPY | 0 | 0 | 0 | 0.0% | 0.0R |
 | EURAUD | 0 | 0 | 0 | 0.0% | 0.0R |
-| EURCHF | 0 | 0 | 0 | 0.0% | 0.0R |
-| EURGBP | 0 | 0 | 0 | 0.0% | 0.0R |
+| EURCHF | 1 | 0 | 1 | 0.0% | -1.0R |
+| EURGBP | 3 | 1 | 2 | 33.3% | 0.0R |
 | EURJPY | 0 | 0 | 0 | 0.0% | 0.0R |
-| EURUSD | 0 | 0 | 0 | 0.0% | 0.0R |
-| GBPJPY | 0 | 0 | 0 | 0.0% | 0.0R |
-| GBPUSD | 0 | 0 | 0 | 0.0% | 0.0R |
-| NZDUSD | 0 | 0 | 0 | 0.0% | 0.0R |
-| USDCAD | 0 | 0 | 0 | 0.0% | 0.0R |
-| USDCHF | 0 | 0 | 0 | 0.0% | 0.0R |
-| USDJPY | 1 | 0 | 0 | 0.0% | 0.14R |
+| EURUSD | 1 | 0 | 1 | 0.0% | -1.0R |
+| GBPJPY | 2 | 1 | 1 | 50.0% | 1.0R |
+| GBPUSD | 2 | 1 | 1 | 50.0% | 1.0R |
+| NZDUSD | 2 | 2 | 0 | 100.0% | 4.0R |
+| USDCAD | 2 | 1 | 1 | 50.0% | 1.0R |
+| USDCHF | 2 | 1 | 1 | 50.0% | 1.09R |
+| USDJPY | 3 | 1 | 2 | 33.3% | 0.0R |
 
 ## All Signals (Chronological)
 
 | Date | Pair | Dir | Entry | SL | TP | RR | Outcome | Bars | R |
 |------|------|-----|------:|----:|----:|----:|---------|-----:|---:|
-| 2026-09-15 17:15 | USDJPY | buy | 155.12700 | 155.03400 | 155.31300 | 2.00 | expired | 53 | +0.00 |
+| 2026-09-14 08:20 | GBPUSD | sell | 1.34838 | 1.34866 | 1.34782 | 2.00 | win | 11 | +2.00 |
+| 2026-09-14 08:20 | EURGBP | sell | 0.85562 | 0.85598 | 0.85490 | 2.00 | loss | 11 | -1.00 |
+| 2026-09-14 09:35 | AUDUSD | sell | 0.71248 | 0.71263 | 0.71218 | 2.00 | loss | 1 | -1.00 |
+| 2026-09-14 12:45 | EURGBP | sell | 0.85549 | 0.85570 | 0.85507 | 2.00 | loss | 1 | -1.00 |
+| 2026-09-14 12:55 | USDCHF | buy | 0.81784 | 0.81762 | 0.81830 | 2.09 | win | 10 | +2.09 |
+| 2026-09-14 13:20 | USDCAD | buy | 1.39191 | 1.39151 | 1.39271 | 2.00 | win | 4 | +2.00 |
+| 2026-09-14 14:10 | EURUSD | sell | 1.15238 | 1.15264 | 1.15186 | 2.00 | loss | 1 | -1.00 |
+| 2026-09-14 14:10 | USDJPY | buy | 154.98200 | 154.91300 | 155.12000 | 2.00 | loss | 1 | -1.00 |
+| 2026-09-14 17:35 | EURGBP | sell | 0.85572 | 0.85583 | 0.85550 | 2.00 | win | 4 | +2.00 |
+| 2026-09-14 19:35 | NZDUSD | sell | 0.57815 | 0.57823 | 0.57799 | 2.00 | win | 3 | +2.00 |
+| 2026-09-14 19:50 | USDJPY | buy | 154.27400 | 154.24100 | 154.34000 | 2.00 | win | 1 | +2.00 |
+| 2026-09-15 08:05 | GBPJPY | buy | 208.79300 | 208.68600 | 209.00700 | 2.00 | win | 1 | +2.00 |
+| 2026-09-15 12:05 | NZDUSD | sell | 0.57597 | 0.57619 | 0.57553 | 2.00 | win | 4 | +2.00 |
+| 2026-09-15 12:15 | EURCHF | buy | 0.94455 | 0.94432 | 0.94501 | 2.00 | loss | 1 | -1.00 |
+| 2026-09-15 12:30 | GBPUSD | sell | 1.34800 | 1.34818 | 1.34764 | 2.00 | loss | 1 | -1.00 |
+| 2026-09-15 12:55 | USDCAD | buy | 1.39293 | 1.39253 | 1.39373 | 2.00 | loss | 1 | -1.00 |
+| 2026-09-15 14:35 | USDCHF | buy | 0.81931 | 0.81896 | 0.82001 | 2.00 | loss | 6 | -1.00 |
+| 2026-09-15 15:15 | USDJPY | buy | 155.08300 | 155.01800 | 155.21300 | 2.00 | loss | 8 | -1.00 |
+| 2026-09-15 17:05 | GBPJPY | buy | 209.07100 | 209.02000 | 209.17300 | 2.00 | loss | 3 | -1.00 |
 
 ## Bottleneck Analysis
 
-Aligned candidates: **485**
+Aligned candidates: **359**
 
 | Filter | Rejections | % of candidates |
 |--------|-----------:|----------------:|
-| Session | 102 | 21.0% |
-| Chop | 7 | 1.4% |
-| Breakout | 278 | 57.3% |
-| Retest | 40 | 8.2% |
-| Rejection | 33 | 6.8% |
-| Sweep | 24 | 4.9% |
+| Session | 93 | 25.9% |
+| Chop | 5 | 1.4% |
+| Breakout | 181 | 50.4% |
+| Retest | 30 | 8.4% |
+| Rejection | 31 | 8.6% |
+| Sweep | 0 | 0.0% |
 | RR | 0 | 0.0% |

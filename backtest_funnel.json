@@ -1,7 +1,7 @@
 {
-  "generated": "2026-09-15T21:32:18.479350+00:00",
+  "generated": "2026-09-15T21:39:49.391611+00:00",
   "months_back": 3,
-  "sweep_mode": "strict",
+  "sweep_mode": "force",
   "pairs": [
     "EURUSD",
     "GBPUSD",
@@ -21,92 +21,92 @@
   ],
   "funnels": {
     "EURUSD": {
-      "bias_not_aligned": 46,
-      "session": 11,
-      "chop": 1,
-      "breakout": 25,
-      "retest": 4,
-      "rejection": 1,
-      "sweep": 2,
-      "rr": 0,
-      "signal": 0
-    },
-    "GBPUSD": {
-      "bias_not_aligned": 49,
-      "session": 6,
-      "chop": 0,
-      "breakout": 28,
-      "retest": 4,
-      "rejection": 2,
-      "sweep": 1,
-      "rr": 0,
-      "signal": 0
-    },
-    "USDJPY": {
-      "bias_not_aligned": 21,
+      "bias_not_aligned": 47,
       "session": 9,
-      "chop": 0,
-      "breakout": 37,
+      "chop": 1,
+      "breakout": 16,
       "retest": 4,
-      "rejection": 6,
-      "sweep": 3,
+      "rejection": 3,
+      "sweep": 0,
       "rr": 0,
       "signal": 1
     },
-    "AUDUSD": {
-      "bias_not_aligned": 50,
-      "session": 0,
+    "GBPUSD": {
+      "bias_not_aligned": 45,
+      "session": 6,
       "chop": 0,
-      "breakout": 33,
-      "retest": 3,
-      "rejection": 2,
-      "sweep": 2,
+      "breakout": 18,
+      "retest": 1,
+      "rejection": 1,
+      "sweep": 0,
       "rr": 0,
-      "signal": 0
+      "signal": 2
     },
-    "USDCAD": {
-      "bias_not_aligned": 31,
+    "USDJPY": {
+      "bias_not_aligned": 12,
       "session": 12,
-      "chop": 4,
-      "breakout": 31,
-      "retest": 6,
-      "rejection": 4,
-      "sweep": 2,
+      "chop": 0,
+      "breakout": 25,
+      "retest": 5,
+      "rejection": 7,
+      "sweep": 0,
       "rr": 0,
-      "signal": 0
+      "signal": 3
     },
-    "USDCHF": {
-      "bias_not_aligned": 50,
+    "AUDUSD": {
+      "bias_not_aligned": 49,
       "session": 0,
       "chop": 0,
       "breakout": 27,
-      "retest": 6,
-      "rejection": 5,
-      "sweep": 2,
+      "retest": 1,
+      "rejection": 3,
+      "sweep": 0,
       "rr": 0,
-      "signal": 0
+      "signal": 1
+    },
+    "USDCAD": {
+      "bias_not_aligned": 27,
+      "session": 13,
+      "chop": 4,
+      "breakout": 20,
+      "retest": 3,
+      "rejection": 4,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 2
+    },
+    "USDCHF": {
+      "bias_not_aligned": 45,
+      "session": 0,
+      "chop": 0,
+      "breakout": 18,
+      "retest": 5,
+      "rejection": 3,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 2
     },
     "NZDUSD": {
-      "bias_not_aligned": 20,
-      "session": 18,
+      "bias_not_aligned": 15,
+      "session": 14,
       "chop": 0,
-      "breakout": 41,
-      "retest": 5,
-      "rejection": 4,
-      "sweep": 2,
+      "breakout": 35,
+      "retest": 4,
+      "rejection": 3,
+      "sweep": 0,
       "rr": 0,
-      "signal": 0
+      "signal": 2
     },
     "EURGBP": {
-      "bias_not_aligned": 38,
-      "session": 24,
-      "chop": 2,
-      "breakout": 20,
+      "bias_not_aligned": 37,
+      "session": 21,
+      "chop": 0,
+      "breakout": 2,
       "retest": 1,
-      "rejection": 1,
-      "sweep": 4,
+      "rejection": 0,
+      "sweep": 0,
       "rr": 0,
-      "signal": 0
+      "signal": 3
     },
     "EURJPY": {
       "bias_not_aligned": 90,
@@ -121,14 +121,14 @@
     },
     "GBPJPY": {
       "bias_not_aligned": 34,
-      "session": 18,
+      "session": 14,
       "chop": 0,
-      "breakout": 27,
-      "retest": 4,
+      "breakout": 14,
+      "retest": 5,
       "rejection": 4,
-      "sweep": 3,
+      "sweep": 0,
       "rr": 0,
-      "signal": 0
+      "signal": 2
     },
     "AUDJPY": {
       "bias_not_aligned": 84,
@@ -153,15 +153,15 @@
       "signal": 0
     },
     "EURCHF": {
-      "bias_not_aligned": 78,
+      "bias_not_aligned": 77,
       "session": 0,
       "chop": 0,
-      "breakout": 4,
-      "retest": 3,
-      "rejection": 2,
-      "sweep": 3,
+      "breakout": 1,
+      "retest": 1,
+      "rejection": 1,
+      "sweep": 0,
       "rr": 0,
-      "signal": 0
+      "signal": 1
     },
     "CADJPY": {
       "bias_not_aligned": 90,

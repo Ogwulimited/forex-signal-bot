@@ -36,11 +36,7 @@ from chop_filter import is_choppy
 # CONFIGURATION
 # =============================================================
 
-PAIRS = [
-    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
-    "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
-    "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "CHFJPY",
-]
+PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD"]
 
 MONTHS_BACK = 12
 SCAN_EVERY_N_BARS = 5
@@ -107,7 +103,11 @@ def _fetch_chunk(symbol, granularity, count, end):
     return []
 
 
-def fetch_history(pair, timeframe, months_back):
+def fetch_history(pair, timeframe, months_back, max_iterations=500):
+    """
+    Fetch historical candles with proper pagination and deduplication.
+    Handles the case where Deriv returns fewer candles per request than requested.
+    """
     symbol = SYMBOL_MAP.get(pair.upper())
     if not symbol:
         raise ValueError(f"Unknown pair: {pair}")
@@ -117,25 +117,43 @@ def fetch_history(pair, timeframe, months_back):
     target = CANDLES_PER_DAY[timeframe] * days
 
     all_candles = []
+    seen_epochs = set()
     end = "latest"
     remaining = target
+    iterations = 0
 
-    while remaining > 0:
+    while remaining > 0 and iterations < max_iterations:
+        iterations += 1
         take = min(5000, remaining)
+
         try:
             chunk = _fetch_chunk(symbol, granularity, take, end)
         except Exception as e:
-            print(f"    Fetch error for {pair} {timeframe}: {e}")
+            print(f"    Fetch error (iter {iterations}): {e}")
             break
+
         if not chunk:
+            print(f"    No more data at iteration {iterations}")
             break
-        all_candles = chunk + all_candles
-        remaining -= len(chunk)
-        if len(chunk) < take:
+
+        # Deduplicate: only keep candles we haven't seen
+        new_candles = [c for c in chunk if int(c["epoch"]) not in seen_epochs]
+        if not new_candles:
+            print(f"    No new data at iteration {iterations}, stopping")
             break
-        earliest = int(chunk[0]["epoch"])
+
+        for c in new_candles:
+            seen_epochs.add(int(c["epoch"]))
+
+        all_candles = new_candles + all_candles
+        remaining -= len(new_candles)
+
+        earliest = min(int(c["epoch"]) for c in new_candles)
         end = earliest - 1
         time.sleep(0.3)
+
+    print(f"    Fetched {len(all_candles)} candles in {iterations} iterations "
+          f"(target {target})")
 
     return [
         {
@@ -145,7 +163,7 @@ def fetch_history(pair, timeframe, months_back):
             "low": float(c["low"]),
             "close": float(c["close"]),
         }
-        for c in all_candles
+        for c in sorted(all_candles, key=lambda x: int(x["epoch"]))
     ]
 
 

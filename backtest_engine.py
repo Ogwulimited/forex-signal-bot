@@ -1,14 +1,19 @@
 """
-Backtest Engine - Funnel Diagnostic for Trendline Breakout + Retest Strategy
+Backtest Engine - Funnel + Expectancy Diagnostic
 
 Walks historical 5M candles pair-by-pair, reconstructs the live pipeline
-at each scan point, and counts which stage each setup dies at.
+at each scan point, counts funnel rejections, and simulates each signal
+forward to TP/SL to measure win rate and expectancy.
 
-Output:
+Configurable SWEEP_MODE:
+  - "strict"   : current production sweep (default)
+  - "adaptive" : middle-ground sweep (build separately)
+  - "force"    : ignore sweep stage entirely (for win-rate baseline)
+
+Outputs:
   - backtest_report.md
   - backtest_funnel.json
-
-Run via GitHub Actions workflow "Backtest Strategy" (manual trigger).
+  - backtest_trades.json
 """
 
 import json
@@ -38,7 +43,7 @@ PAIRS = [
 ]
 
 MONTHS_BACK = 3
-SCAN_EVERY_N_BARS = 5      # check every 5th 5M candle (~every 25 min)
+SCAN_EVERY_N_BARS = 5
 WINDOW_5M = 100
 WINDOW_4H = 40
 WINDOW_1H = 40
@@ -51,6 +56,13 @@ RETEST_MAX_BARS = 10
 RR_MIN = 2.0
 CHOP_LOOKBACK = 20
 CHOP_MIN_RANGE_RATIO = 0.0005
+
+# Trade simulation
+MAX_HOLD_BARS = 576        # 48 hours of 5M candles
+COOLDOWN_BARS = 48         # ~4h anti-spam, matches production
+
+# Sweep mode: "strict" | "adaptive" | "force"
+SWEEP_MODE = "strict"
 
 
 # =============================================================
@@ -138,7 +150,7 @@ def fetch_history(pair, timeframe, months_back):
 
 
 # =============================================================
-# STRATEGY REPLAY
+# BIAS
 # =============================================================
 
 def compute_bias(pair, candles_4h, candles_1h):
@@ -157,20 +169,27 @@ def compute_bias(pair, candles_4h, candles_1h):
     }
 
 
+# =============================================================
+# PIPELINE (returns stage + signal dict)
+# =============================================================
+
 def run_pipeline(pair, candles_5m, bias_data, current_epoch):
-    """Replay of signal_dispatcher.generate_signal, returning the rejecting stage."""
+    """
+    Returns (stage, signal_dict_or_None).
+    stage: one of bias_not_aligned / session / chop / breakout /
+           retest / rejection / sweep / rr / signal
+    """
     if not bias_data["aligned"]:
-        return "bias_not_aligned"
+        return "bias_not_aligned", None
 
     direction = "buy" if bias_data["bias_4h"] == "bullish" else "sell"
 
-    # Session filter (07:00–20:00 UTC) — matches live bot
     hour_utc = datetime.fromtimestamp(current_epoch, tz=timezone.utc).hour
     if not (7 <= hour_utc < 20):
-        return "session"
+        return "session", None
 
     if is_choppy(candles_5m, lookback=CHOP_LOOKBACK, min_range_ratio=CHOP_MIN_RANGE_RATIO):
-        return "chop"
+        return "chop", None
 
     breakout = detect_breakout(
         candles_5m, direction,
@@ -179,7 +198,7 @@ def run_pipeline(pair, candles_5m, bias_data, current_epoch):
         debug=False, force_breakout=False,
     )
     if not breakout:
-        return "breakout"
+        return "breakout", None
 
     retest = detect_retest(
         candles_5m, breakout, direction,
@@ -188,42 +207,94 @@ def run_pipeline(pair, candles_5m, bias_data, current_epoch):
         debug=False,
     )
     if not retest:
-        return "retest"
+        return "retest", None
 
     rejection = detect_rejection(
         candles_5m, direction, retest=retest, breakout=breakout, debug=False,
     )
     if not rejection:
-        return "rejection"
+        return "rejection", None
 
-    sweep = detect_liquidity_sweep(
-        candles_5m, direction,
-        breakout=breakout, retest=retest,
-        lookback=20, debug=False, force_sweep=False,
-    )
-    if not sweep:
-        return "sweep"
+    if SWEEP_MODE == "force":
+        sweep = {"forced": True, "mode": "force", "level": retest["candle"]["close"]}
+    else:
+        sweep = detect_liquidity_sweep(
+            candles_5m, direction,
+            breakout=breakout, retest=retest,
+            lookback=20, debug=False, force_sweep=False,
+        )
+        if not sweep:
+            return "sweep", None
 
     trade = calculate_rr(
         candles_5m, direction, rejection, sweep, min_rr=RR_MIN, debug=False,
     )
     if not trade:
-        return "rr"
+        return "rr", None
 
-    return "signal"
+    return "signal", {
+        "direction": direction,
+        "entry": trade["entry"],
+        "sl": trade["sl"],
+        "tp": trade["tp"],
+        "rr": trade["rr"],
+        "epoch": current_epoch,
+    }
 
+
+# =============================================================
+# TRADE SIMULATION
+# =============================================================
+
+def simulate_trade(candles_5m, entry_idx, direction, entry, sl, tp):
+    """
+    Walk forward from entry_idx+1 until TP or SL is hit, or MAX_HOLD_BARS reached.
+    Conservative: if a single candle touches both TP and SL, count as LOSS.
+    Returns dict with outcome, bars_held, exit_price, exit_idx, ambiguous.
+    """
+    start = entry_idx + 1
+    end = min(len(candles_5m), start + MAX_HOLD_BARS)
+
+    for i in range(start, end):
+        c = candles_5m[i]
+        high, low = c["high"], c["low"]
+
+        if direction == "buy":
+            tp_hit = high >= tp
+            sl_hit = low <= sl
+        else:
+            tp_hit = low <= tp
+            sl_hit = high >= sl
+
+        if tp_hit and sl_hit:
+            return {"outcome": "loss", "bars_held": i - entry_idx,
+                    "exit_price": sl, "exit_idx": i, "ambiguous": True}
+        if sl_hit:
+            return {"outcome": "loss", "bars_held": i - entry_idx,
+                    "exit_price": sl, "exit_idx": i, "ambiguous": False}
+        if tp_hit:
+            return {"outcome": "win", "bars_held": i - entry_idx,
+                    "exit_price": tp, "exit_idx": i, "ambiguous": False}
+
+    last = candles_5m[end - 1]
+    return {"outcome": "expired", "bars_held": end - entry_idx,
+            "exit_price": last["close"], "exit_idx": end - 1, "ambiguous": False}
+
+
+# =============================================================
+# BACKTEST ONE PAIR
+# =============================================================
 
 def backtest_pair(pair, data_5m, data_4h, data_1h, verbose=True):
     funnel = Counter()
-    stage_order = [
-        "bias_not_aligned", "session", "chop",
-        "breakout", "retest", "rejection", "sweep", "rr", "signal",
-    ]
-    for s in stage_order:
+    for s in ["bias_not_aligned", "session", "chop", "breakout",
+              "retest", "rejection", "sweep", "rr", "signal"]:
         funnel[s] = 0
 
+    trade_outcomes = []
+
     if len(data_5m) < WINDOW_5M + 1:
-        return funnel
+        return funnel, trade_outcomes
 
     epochs_4h = [c["datetime"] for c in data_4h]
     epochs_1h = [c["datetime"] for c in data_1h]
@@ -232,7 +303,8 @@ def backtest_pair(pair, data_5m, data_4h, data_1h, verbose=True):
     idx_1h = 0
     scan_points = 0
 
-    for i in range(WINDOW_5M, len(data_5m), SCAN_EVERY_N_BARS):
+    i = WINDOW_5M
+    while i < len(data_5m):
         t = data_5m[i]["datetime"]
 
         while idx_4h < len(epochs_4h) and epochs_4h[idx_4h] <= t:
@@ -241,6 +313,7 @@ def backtest_pair(pair, data_5m, data_4h, data_1h, verbose=True):
             idx_1h += 1
 
         if idx_4h < WINDOW_4H or idx_1h < WINDOW_1H:
+            i += SCAN_EVERY_N_BARS
             continue
 
         candles_5m = data_5m[i - WINDOW_5M:i]
@@ -248,28 +321,95 @@ def backtest_pair(pair, data_5m, data_4h, data_1h, verbose=True):
         candles_1h = data_1h[idx_1h - WINDOW_1H:idx_1h]
 
         bias_data = compute_bias(pair, candles_4h, candles_1h)
-        stage = run_pipeline(pair, candles_5m, bias_data, t)
+        stage, signal = run_pipeline(pair, candles_5m, bias_data, t)
         funnel[stage] += 1
         scan_points += 1
 
+        if stage == "signal" and signal:
+            outcome = simulate_trade(
+                data_5m, i - 1, signal["direction"],
+                signal["entry"], signal["sl"], signal["tp"],
+            )
+            trade_outcomes.append({
+                "pair": pair,
+                "epoch": t,
+                "direction": signal["direction"],
+                "entry": signal["entry"],
+                "sl": signal["sl"],
+                "tp": signal["tp"],
+                "rr": signal["rr"],
+                "outcome": outcome["outcome"],
+                "bars_held": outcome["bars_held"],
+                "exit_price": outcome["exit_price"],
+                "ambiguous": outcome["ambiguous"],
+            })
+            i += COOLDOWN_BARS
+            continue
+
+        i += SCAN_EVERY_N_BARS
+
     if verbose:
-        print(f"    Scan points evaluated: {scan_points}")
-    return funnel
+        print(f"    Scan points: {scan_points}  |  Signals: {len(trade_outcomes)}")
+
+    return funnel, trade_outcomes
 
 
 # =============================================================
 # REPORT
 # =============================================================
 
-def format_report(all_funnels, months_back):
+def compute_expectancy_stats(trades):
+    if not trades:
+        return {
+            "total": 0, "wins": 0, "losses": 0, "expired": 0,
+            "win_rate": 0.0, "avg_r": 0.0, "total_r": 0.0,
+            "avg_bars_held": 0.0, "ambiguous": 0,
+        }
+    wins = [t for t in trades if t["outcome"] == "win"]
+    losses = [t for t in trades if t["outcome"] == "loss"]
+    expired = [t for t in trades if t["outcome"] == "expired"]
+
+    # R for wins = t['rr'] (full TP), R for losses = -1, R for expired = partial
+    r_sum = 0.0
+    for t in trades:
+        if t["outcome"] == "win":
+            r_sum += t["rr"]
+        elif t["outcome"] == "loss":
+            r_sum -= 1.0
+        else:  # expired: use actual exit vs entry, in units of risk
+            risk = abs(t["entry"] - t["sl"])
+            if risk > 0:
+                move = (t["exit_price"] - t["entry"]) if t["direction"] == "buy" \
+                       else (t["entry"] - t["exit_price"])
+                r_sum += move / risk
+
+    total = len(trades)
+    return {
+        "total": total,
+        "wins": len(wins),
+        "losses": len(losses),
+        "expired": len(expired),
+        "win_rate": round(len(wins) / total * 100, 1) if total else 0.0,
+        "avg_r": round(r_sum / total, 2) if total else 0.0,
+        "total_r": round(r_sum, 2),
+        "avg_bars_held": round(sum(t["bars_held"] for t in trades) / total, 0) if total else 0,
+        "ambiguous": sum(1 for t in trades if t["ambiguous"]),
+    }
+
+
+def format_report(all_funnels, all_trades, months_back):
     lines = []
-    lines.append("# Backtest Funnel Report\n")
+    lines.append("# Backtest Report — Funnel + Expectancy\n")
     lines.append(f"Generated: {datetime.now(timezone.utc).isoformat()}  ")
     lines.append(f"History window: last {months_back} months  ")
     lines.append(f"Pairs tested: {len(all_funnels)}  ")
     lines.append(f"Scan cadence: every {SCAN_EVERY_N_BARS}th 5M candle "
-                 f"(~every {SCAN_EVERY_N_BARS*5} min)\n")
+                 f"(~every {SCAN_EVERY_N_BARS*5} min)  ")
+    lines.append(f"Sweep mode: **{SWEEP_MODE}**  ")
+    lines.append(f"Cooldown between signals: {COOLDOWN_BARS} bars "
+                 f"(~{COOLDOWN_BARS*5/60:.1f}h)\n")
 
+    # ---- Funnel ----
     stages = [
         ("bias_not_aligned", "HTF not aligned"),
         ("session", "Outside London/NY session"),
@@ -282,81 +422,85 @@ def format_report(all_funnels, months_back):
         ("signal", "SIGNAL (all stages passed)"),
     ]
 
-    total = sum(sum(f.values()) for f in all_funnels.values())
+    total_scan = sum(sum(f.values()) for f in all_funnels.values())
 
     lines.append("## Aggregate Funnel\n")
     lines.append("| Stage | Count | % of scan points |")
     lines.append("|-------|------:|-----------------:|")
     for key, label in stages:
         cnt = sum(f.get(key, 0) for f in all_funnels.values())
-        pct = (cnt / total * 100) if total else 0
+        pct = (cnt / total_scan * 100) if total_scan else 0
         lines.append(f"| {label} | {cnt} | {pct:.2f}% |")
-    lines.append(f"| **Total scan points** | **{total}** | 100% |\n")
+    lines.append(f"| **Total scan points** | **{total_scan}** | 100% |\n")
 
-    signals = sum(f.get("signal", 0) for f in all_funnels.values())
-    per_month = signals / months_back if months_back else 0
-    lines.append(f"**Signal rate:** {signals} signals over {months_back} months "
-                 f"= **{per_month:.2f} signals / month** across {len(all_funnels)} pairs\n")
+    # ---- Expectancy ----
+    all_outcomes = []
+    for pair, trades in all_trades.items():
+        all_outcomes.extend(trades)
 
-    lines.append("## Per-Pair Funnel\n")
-    header = "| Pair | " + " | ".join(label.split()[0] for _, label in stages) + " |"
-    sep = "|" + "---|" * (len(stages) + 1)
-    lines.append(header)
-    lines.append(sep)
-    for pair, f in sorted(all_funnels.items()):
-        row = [pair] + [str(f.get(k, 0)) for k, _ in stages]
-        lines.append("| " + " | ".join(row) + " |")
+    stats = compute_expectancy_stats(all_outcomes)
+    per_month = stats["total"] / months_back if months_back else 0
+
+    lines.append("## Expectancy Summary\n")
+    lines.append(f"- Total signals: **{stats['total']}**")
+    lines.append(f"- Signals per month: **{per_month:.2f}** across {len(all_funnels)} pairs")
+    lines.append(f"- Wins: **{stats['wins']}**  |  Losses: **{stats['losses']}**  |  Expired: **{stats['expired']}**")
+    lines.append(f"- Win rate: **{stats['win_rate']}%**")
+    lines.append(f"- Average R per trade: **{stats['avg_r']}R**")
+    lines.append(f"- Total R over {months_back} months: **{stats['total_r']}R**")
+    lines.append(f"- Average hold time: **{stats['avg_bars_held']} bars** "
+                 f"(~{stats['avg_bars_held']*5/60:.1f}h)")
+    if stats["ambiguous"]:
+        lines.append(f"- Ambiguous (TP+SL in same candle, counted as LOSS): **{stats['ambiguous']}**")
     lines.append("")
 
-    lines.append("## Bottleneck Analysis\n")
+    # Monthly R projection
+    if months_back > 0:
+        lines.append(f"**Monthly expectancy (R): {stats['total_r'] / months_back:.2f}R**\n")
 
+    # ---- Per-Pair ----
+    lines.append("## Per-Pair Results\n")
+    lines.append("| Pair | Signals | Wins | Losses | Win% | Total R |")
+    lines.append("|------|--------:|-----:|-------:|-----:|--------:|")
+    for pair in sorted(all_funnels.keys()):
+        trades = all_trades.get(pair, [])
+        ps = compute_expectancy_stats(trades)
+        lines.append(f"| {pair} | {ps['total']} | {ps['wins']} | "
+                     f"{ps['losses']} | {ps['win_rate']}% | {ps['total_r']}R |")
+    lines.append("")
+
+    # ---- Trade List ----
+    if all_outcomes:
+        lines.append("## All Signals (Chronological)\n")
+        lines.append("| Date | Pair | Dir | Entry | SL | TP | RR | Outcome | Bars | R |")
+        lines.append("|------|------|-----|------:|----:|----:|----:|---------|-----:|---:|")
+        for t in sorted(all_outcomes, key=lambda x: x["epoch"]):
+            d = datetime.fromtimestamp(t["epoch"], tz=timezone.utc).strftime("%Y-%m-%d %H:%M")
+            r = t["rr"] if t["outcome"] == "win" else (-1.0 if t["outcome"] == "loss" else 0.0)
+            lines.append(f"| {d} | {t['pair']} | {t['direction']} | "
+                         f"{t['entry']:.5f} | {t['sl']:.5f} | {t['tp']:.5f} | "
+                         f"{t['rr']:.2f} | {t['outcome']} | {t['bars_held']} | {r:+.2f} |")
+        lines.append("")
+
+    # ---- Bottleneck ----
     aligned = sum(f.get("session", 0) + f.get("chop", 0) + f.get("breakout", 0) +
                   f.get("retest", 0) + f.get("rejection", 0) + f.get("sweep", 0) +
                   f.get("rr", 0) + f.get("signal", 0)
                   for f in all_funnels.values())
-
-    if aligned == 0:
-        lines.append("**No setups reached the pipeline.** "
-                     "HTF alignment is the bottleneck — no pair had aligned bias "
-                     "during the test window.\n")
-    else:
-        stages_after = [
-            ("session", "Session filter"),
-            ("chop", "Chop filter"),
-            ("breakout", "Breakout"),
-            ("retest", "Retest"),
-            ("rejection", "Rejection"),
-            ("sweep", "Sweep"),
-            ("rr", "RR filter"),
-        ]
-        drops = [(sum(f.get(k, 0) for f in all_funnels.values()), label)
-                 for k, label in stages_after]
-        drops.sort(reverse=True)
-
-        lines.append(f"Aligned candidates entering the pipeline: **{aligned}**\n")
+    if aligned:
+        lines.append("## Bottleneck Analysis\n")
+        lines.append(f"Aligned candidates: **{aligned}**\n")
         lines.append("| Filter | Rejections | % of candidates |")
         lines.append("|--------|-----------:|----------------:|")
-        for cnt, label in drops:
+        pairs_list = [("session", "Session"), ("chop", "Chop"), ("breakout", "Breakout"),
+                      ("retest", "Retest"), ("rejection", "Rejection"),
+                      ("sweep", "Sweep"), ("rr", "RR")]
+        for k, label in pairs_list:
+            cnt = sum(f.get(k, 0) for f in all_funnels.values())
             pct = (cnt / aligned * 100) if aligned else 0
             lines.append(f"| {label} | {cnt} | {pct:.1f}% |")
         lines.append("")
 
-        top_cnt, top_label = drops[0]
-        top_pct = (top_cnt / aligned * 100) if aligned else 0
-        lines.append(f"**Primary bottleneck: {top_label}** — rejected "
-                     f"{top_cnt} of {aligned} candidates ({top_pct:.1f}%).\n")
-
-    lines.append("## Interpretation Guide\n")
-    lines.append("- **HTF not aligned dominates:** watchlist thresholds may be too strict, "
-                 "or pairs are not trending in this window.")
-    lines.append("- **Session dominates:** most setups happen outside London/NY hours.")
-    lines.append("- **Breakout dominates:** swing definition is too strict, or price "
-                 "genuinely does not break structure as often as assumed.")
-    lines.append("- **Retest dominates:** tolerance or max bars may be too tight.")
-    lines.append("- **Rejection dominates:** wick-ratio threshold may be miscalibrated.")
-    lines.append("- **Sweep dominates:** sweep definition may not match real price behavior.")
-    lines.append("- **RR dominates:** TP structure may create poor RR on most setups.")
-    lines.append("- **Signal count healthy (>1/month):** parameters are calibrated.")
     return "\n".join(lines)
 
 
@@ -366,36 +510,38 @@ def format_report(all_funnels, months_back):
 
 def main():
     print("=" * 60)
-    print("BACKTEST ENGINE - FUNNEL DIAGNOSTIC")
+    print("BACKTEST ENGINE - FUNNEL + EXPECTANCY")
     print("=" * 60)
     print(f"Pairs: {len(PAIRS)}  |  History: {MONTHS_BACK} months  |  "
-          f"Scan cadence: every {SCAN_EVERY_N_BARS}th 5M candle")
+          f"Sweep mode: {SWEEP_MODE}")
     print()
 
     all_funnels = {}
+    all_trades = {}
 
     for pair in PAIRS:
         print(f"\n--- {pair} ---")
         try:
-            print("  Fetching 5M history...")
+            print("  Fetching 5M...")
             data_5m = fetch_history(pair, "5min", MONTHS_BACK)
             print(f"    5M candles: {len(data_5m)}")
 
-            print("  Fetching 1H history...")
+            print("  Fetching 1H...")
             data_1h = fetch_history(pair, "1h", MONTHS_BACK)
             print(f"    1H candles: {len(data_1h)}")
 
-            print("  Fetching 4H history...")
+            print("  Fetching 4H...")
             data_4h = fetch_history(pair, "4h", MONTHS_BACK)
             print(f"    4H candles: {len(data_4h)}")
 
             if len(data_5m) < WINDOW_5M + 100 or len(data_4h) < WINDOW_4H + 10:
-                print(f"    Insufficient history for {pair}, skipping")
+                print(f"    Insufficient history, skipping")
                 continue
 
             print("  Replaying pipeline...")
-            funnel = backtest_pair(pair, data_5m, data_4h, data_1h, verbose=True)
+            funnel, trades = backtest_pair(pair, data_5m, data_4h, data_1h, verbose=True)
             all_funnels[pair] = funnel
+            all_trades[pair] = trades
 
             del data_5m, data_4h, data_1h
         except Exception as e:
@@ -405,7 +551,7 @@ def main():
     print("\n" + "=" * 60)
     print("Writing reports...")
 
-    report = format_report(all_funnels, MONTHS_BACK)
+    report = format_report(all_funnels, all_trades, MONTHS_BACK)
     with open("backtest_report.md", "w") as f:
         f.write(report)
 
@@ -413,16 +559,26 @@ def main():
         json.dump({
             "generated": datetime.now(timezone.utc).isoformat(),
             "months_back": MONTHS_BACK,
+            "sweep_mode": SWEEP_MODE,
             "pairs": list(all_funnels.keys()),
             "funnels": {p: dict(f) for p, f in all_funnels.items()},
         }, f, indent=2)
 
-    print("Wrote backtest_report.md and backtest_funnel.json")
+    all_outcomes = []
+    for trades in all_trades.values():
+        all_outcomes.extend(trades)
 
-    total_signals = sum(f.get("signal", 0) for f in all_funnels.values())
-    total_scans = sum(sum(f.values()) for f in all_funnels.values())
-    print(f"\nSUMMARY: {total_signals} signals from {total_scans} scan points "
-          f"({total_signals / MONTHS_BACK:.2f}/month)")
+    with open("backtest_trades.json", "w") as f:
+        json.dump(all_outcomes, f, indent=2, default=str)
+
+    print("Wrote backtest_report.md, backtest_funnel.json, backtest_trades.json")
+
+    stats = compute_expectancy_stats(all_outcomes)
+    print(f"\nSUMMARY:")
+    print(f"  Signals: {stats['total']} ({stats['total']/MONTHS_BACK:.2f}/month)")
+    print(f"  Win rate: {stats['win_rate']}%")
+    print(f"  Avg R: {stats['avg_r']}R")
+    print(f"  Monthly R: {stats['total_r']/MONTHS_BACK:.2f}R")
 
 
 if __name__ == "__main__":

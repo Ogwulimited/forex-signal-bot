@@ -1,70 +1,75 @@
-# Backtest Funnel Report
+# Backtest Report — Funnel + Expectancy
 
-Generated: 2026-09-15T20:34:09.529420+00:00  
+Generated: 2026-09-15T21:17:57.722403+00:00  
 History window: last 3 months  
 Pairs tested: 15  
-Scan cadence: every 5th 5M candle (~every 25 min)
+Scan cadence: every 5th 5M candle (~every 25 min)  
+Sweep mode: **strict**  
+Cooldown between signals: 48 bars (~4.0h)
 
 ## Aggregate Funnel
 
 | Stage | Count | % of scan points |
 |-------|------:|-----------------:|
-| HTF not aligned | 819 | 62.76% |
-| Outside London/NY session | 97 | 7.43% |
-| Chop filter rejected | 7 | 0.54% |
-| No swing breakout | 282 | 21.61% |
-| No real retest | 41 | 3.14% |
-| No rejection candle | 34 | 2.61% |
-| No liquidity sweep | 24 | 1.84% |
+| HTF not aligned | 845 | 63.68% |
+| Outside London/NY session | 99 | 7.46% |
+| Chop filter rejected | 7 | 0.53% |
+| No swing breakout | 278 | 20.95% |
+| No real retest | 40 | 3.01% |
+| No rejection candle | 33 | 2.49% |
+| No liquidity sweep | 24 | 1.81% |
 | RR below minimum | 0 | 0.00% |
 | SIGNAL (all stages passed) | 1 | 0.08% |
-| **Total scan points** | **1305** | 100% |
+| **Total scan points** | **1327** | 100% |
 
-**Signal rate:** 1 signals over 3 months = **0.33 signals / month** across 15 pairs
+## Expectancy Summary
 
-## Per-Pair Funnel
+- Total signals: **1**
+- Signals per month: **0.33** across 15 pairs
+- Wins: **0**  |  Losses: **0**  |  Expired: **1**
+- Win rate: **0.0%**
+- Average R per trade: **0.12R**
+- Total R over 3 months: **0.12R**
+- Average hold time: **50.0 bars** (~4.2h)
 
-| Pair | HTF | Outside | Chop | No | No | No | No | RR | SIGNAL |
-|---|---|---|---|---|---|---|---|---|---|
-| AUDJPY | 85 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 |
-| AUDUSD | 47 | 0 | 0 | 33 | 3 | 2 | 2 | 0 | 0 |
-| CADJPY | 87 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| CHFJPY | 87 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| EURAUD | 82 | 0 | 0 | 4 | 0 | 1 | 0 | 0 | 0 |
-| EURCHF | 75 | 0 | 0 | 4 | 3 | 2 | 3 | 0 | 0 |
-| EURGBP | 35 | 24 | 2 | 20 | 1 | 1 | 4 | 0 | 0 |
-| EURJPY | 87 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| EURUSD | 43 | 11 | 1 | 25 | 4 | 1 | 2 | 0 | 0 |
-| GBPJPY | 34 | 15 | 0 | 27 | 4 | 4 | 3 | 0 | 0 |
-| GBPUSD | 45 | 7 | 0 | 28 | 4 | 2 | 1 | 0 | 0 |
-| NZDUSD | 16 | 19 | 0 | 41 | 5 | 4 | 2 | 0 | 0 |
-| USDCAD | 29 | 11 | 4 | 31 | 6 | 4 | 2 | 0 | 0 |
-| USDCHF | 46 | 1 | 0 | 27 | 6 | 5 | 2 | 0 | 0 |
-| USDJPY | 21 | 9 | 0 | 41 | 5 | 7 | 3 | 0 | 1 |
+**Monthly expectancy (R): 0.04R**
+
+## Per-Pair Results
+
+| Pair | Signals | Wins | Losses | Win% | Total R |
+|------|--------:|-----:|-------:|-----:|--------:|
+| AUDJPY | 0 | 0 | 0 | 0.0% | 0.0R |
+| AUDUSD | 0 | 0 | 0 | 0.0% | 0.0R |
+| CADJPY | 0 | 0 | 0 | 0.0% | 0.0R |
+| CHFJPY | 0 | 0 | 0 | 0.0% | 0.0R |
+| EURAUD | 0 | 0 | 0 | 0.0% | 0.0R |
+| EURCHF | 0 | 0 | 0 | 0.0% | 0.0R |
+| EURGBP | 0 | 0 | 0 | 0.0% | 0.0R |
+| EURJPY | 0 | 0 | 0 | 0.0% | 0.0R |
+| EURUSD | 0 | 0 | 0 | 0.0% | 0.0R |
+| GBPJPY | 0 | 0 | 0 | 0.0% | 0.0R |
+| GBPUSD | 0 | 0 | 0 | 0.0% | 0.0R |
+| NZDUSD | 0 | 0 | 0 | 0.0% | 0.0R |
+| USDCAD | 0 | 0 | 0 | 0.0% | 0.0R |
+| USDCHF | 0 | 0 | 0 | 0.0% | 0.0R |
+| USDJPY | 1 | 0 | 0 | 0.0% | 0.12R |
+
+## All Signals (Chronological)
+
+| Date | Pair | Dir | Entry | SL | TP | RR | Outcome | Bars | R |
+|------|------|-----|------:|----:|----:|----:|---------|-----:|---:|
+| 2026-09-15 17:15 | USDJPY | buy | 155.12700 | 155.03400 | 155.31300 | 2.00 | expired | 50 | +0.00 |
 
 ## Bottleneck Analysis
 
-Aligned candidates entering the pipeline: **486**
+Aligned candidates: **482**
 
 | Filter | Rejections | % of candidates |
 |--------|-----------:|----------------:|
-| Breakout | 282 | 58.0% |
-| Session filter | 97 | 20.0% |
-| Retest | 41 | 8.4% |
-| Rejection | 34 | 7.0% |
-| Sweep | 24 | 4.9% |
-| Chop filter | 7 | 1.4% |
-| RR filter | 0 | 0.0% |
-
-**Primary bottleneck: Breakout** — rejected 282 of 486 candidates (58.0%).
-
-## Interpretation Guide
-
-- **HTF not aligned dominates:** watchlist thresholds may be too strict, or pairs are not trending in this window.
-- **Session dominates:** most setups happen outside London/NY hours.
-- **Breakout dominates:** swing definition is too strict, or price genuinely does not break structure as often as assumed.
-- **Retest dominates:** tolerance or max bars may be too tight.
-- **Rejection dominates:** wick-ratio threshold may be miscalibrated.
-- **Sweep dominates:** sweep definition may not match real price behavior.
-- **RR dominates:** TP structure may create poor RR on most setups.
-- **Signal count healthy (>1/month):** parameters are calibrated.
+| Session | 99 | 20.5% |
+| Chop | 7 | 1.5% |
+| Breakout | 278 | 57.7% |
+| Retest | 40 | 8.3% |
+| Rejection | 33 | 6.8% |
+| Sweep | 24 | 5.0% |
+| RR | 0 | 0.0% |

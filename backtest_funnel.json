@@ -1,6 +1,7 @@
 {
-  "generated": "2026-09-15T20:34:09.529746+00:00",
+  "generated": "2026-09-15T21:17:57.722889+00:00",
   "months_back": 3,
+  "sweep_mode": "strict",
   "pairs": [
     "EURUSD",
     "GBPUSD",
@@ -20,7 +21,7 @@
   ],
   "funnels": {
     "EURUSD": {
-      "bias_not_aligned": 43,
+      "bias_not_aligned": 45,
       "session": 11,
       "chop": 1,
       "breakout": 25,
@@ -31,8 +32,8 @@
       "signal": 0
     },
     "GBPUSD": {
-      "bias_not_aligned": 45,
-      "session": 7,
+      "bias_not_aligned": 48,
+      "session": 6,
       "chop": 0,
       "breakout": 28,
       "retest": 4,
@@ -45,15 +46,15 @@
       "bias_not_aligned": 21,
       "session": 9,
       "chop": 0,
-      "breakout": 41,
-      "retest": 5,
-      "rejection": 7,
+      "breakout": 37,
+      "retest": 4,
+      "rejection": 6,
       "sweep": 3,
       "rr": 0,
       "signal": 1
     },
     "AUDUSD": {
-      "bias_not_aligned": 47,
+      "bias_not_aligned": 49,
       "session": 0,
       "chop": 0,
       "breakout": 33,
@@ -64,8 +65,8 @@
       "signal": 0
     },
     "USDCAD": {
-      "bias_not_aligned": 29,
-      "session": 11,
+      "bias_not_aligned": 30,
+      "session": 12,
       "chop": 4,
       "breakout": 31,
       "retest": 6,
@@ -75,8 +76,8 @@
       "signal": 0
     },
     "USDCHF": {
-      "bias_not_aligned": 46,
-      "session": 1,
+      "bias_not_aligned": 49,
+      "session": 0,
       "chop": 0,
       "breakout": 27,
       "retest": 6,
@@ -86,8 +87,8 @@
       "signal": 0
     },
     "NZDUSD": {
-      "bias_not_aligned": 16,
-      "session": 19,
+      "bias_not_aligned": 19,
+      "session": 18,
       "chop": 0,
       "breakout": 41,
       "retest": 5,
@@ -97,7 +98,7 @@
       "signal": 0
     },
     "EURGBP": {
-      "bias_not_aligned": 35,
+      "bias_not_aligned": 37,
       "session": 24,
       "chop": 2,
       "breakout": 20,
@@ -108,7 +109,7 @@
       "signal": 0
     },
     "EURJPY": {
-      "bias_not_aligned": 87,
+      "bias_not_aligned": 89,
       "session": 0,
       "chop": 0,
       "breakout": 0,
@@ -120,7 +121,7 @@
     },
     "GBPJPY": {
       "bias_not_aligned": 34,
-      "session": 15,
+      "session": 17,
       "chop": 0,
       "breakout": 27,
       "retest": 4,
@@ -131,7 +132,7 @@
     },
     "AUDJPY": {
       "bias_not_aligned": 85,
-      "session": 0,
+      "session": 2,
       "chop": 0,
       "breakout": 1,
       "retest": 0,
@@ -141,7 +142,7 @@
       "signal": 0
     },
     "EURAUD": {
-      "bias_not_aligned": 82,
+      "bias_not_aligned": 84,
       "session": 0,
       "chop": 0,
       "breakout": 4,
@@ -152,7 +153,7 @@
       "signal": 0
     },
     "EURCHF": {
-      "bias_not_aligned": 75,
+      "bias_not_aligned": 77,
       "session": 0,
       "chop": 0,
       "breakout": 4,
@@ -163,7 +164,7 @@
       "signal": 0
     },
     "CADJPY": {
-      "bias_not_aligned": 87,
+      "bias_not_aligned": 89,
       "session": 0,
       "chop": 0,
       "breakout": 0,
@@ -174,7 +175,7 @@
       "signal": 0
     },
     "CHFJPY": {
-      "bias_not_aligned": 87,
+      "bias_not_aligned": 89,
       "session": 0,
       "chop": 0,
       "breakout": 0,

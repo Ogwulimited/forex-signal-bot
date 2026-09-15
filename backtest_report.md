@@ -1,7 +1,7 @@
 # Backtest Report — Funnel + Expectancy
 
-Generated: 2026-09-15T21:39:49.391135+00:00  
-History window: last 3 months  
+Generated: 2026-09-15T22:23:09.490846+00:00  
+History window: last 12 months  
 Pairs tested: 15  
 Scan cadence: every 5th 5M candle (~every 25 min)  
 Sweep mode: **force**  
@@ -11,28 +11,28 @@ Cooldown between signals: 48 bars (~4.0h)
 
 | Stage | Count | % of scan points |
 |-------|------:|-----------------:|
-| HTF not aligned | 827 | 69.73% |
-| Outside London/NY session | 93 | 7.84% |
-| Chop filter rejected | 5 | 0.42% |
-| No swing breakout | 181 | 15.26% |
-| No real retest | 30 | 2.53% |
-| No rejection candle | 31 | 2.61% |
+| HTF not aligned | 850 | 69.90% |
+| Outside London/NY session | 100 | 8.22% |
+| Chop filter rejected | 5 | 0.41% |
+| No swing breakout | 181 | 14.88% |
+| No real retest | 30 | 2.47% |
+| No rejection candle | 31 | 2.55% |
 | No liquidity sweep | 0 | 0.00% |
 | RR below minimum | 0 | 0.00% |
-| SIGNAL (all stages passed) | 19 | 1.60% |
-| **Total scan points** | **1186** | 100% |
+| SIGNAL (all stages passed) | 19 | 1.56% |
+| **Total scan points** | **1216** | 100% |
 
 ## Expectancy Summary
 
 - Total signals: **19**
-- Signals per month: **6.33** across 15 pairs
+- Signals per month: **1.58** across 15 pairs
 - Wins: **8**  |  Losses: **11**  |  Expired: **0**
 - Win rate: **42.1%**
 - Average R per trade: **0.27R**
-- Total R over 3 months: **5.09R**
+- Total R over 12 months: **5.09R**
 - Average hold time: **4.0 bars** (~0.3h)
 
-**Monthly expectancy (R): 1.70R**
+**Monthly expectancy (R): 0.42R**
 
 ## Per-Pair Results
 
@@ -80,14 +80,14 @@ Cooldown between signals: 48 bars (~4.0h)
 
 ## Bottleneck Analysis
 
-Aligned candidates: **359**
+Aligned candidates: **366**
 
 | Filter | Rejections | % of candidates |
 |--------|-----------:|----------------:|
-| Session | 93 | 25.9% |
+| Session | 100 | 27.3% |
 | Chop | 5 | 1.4% |
-| Breakout | 181 | 50.4% |
-| Retest | 30 | 8.4% |
-| Rejection | 31 | 8.6% |
+| Breakout | 181 | 49.5% |
+| Retest | 30 | 8.2% |
+| Rejection | 31 | 8.5% |
 | Sweep | 0 | 0.0% |
 | RR | 0 | 0.0% |

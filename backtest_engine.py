@@ -42,7 +42,7 @@ PAIRS = [
     "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "CHFJPY",
 ]
 
-MONTHS_BACK = 3
+MONTHS_BACK = 12
 SCAN_EVERY_N_BARS = 5
 WINDOW_5M = 100
 WINDOW_4H = 40
@@ -170,15 +170,10 @@ def compute_bias(pair, candles_4h, candles_1h):
 
 
 # =============================================================
-# PIPELINE (returns stage + signal dict)
+# PIPELINE
 # =============================================================
 
 def run_pipeline(pair, candles_5m, bias_data, current_epoch):
-    """
-    Returns (stage, signal_dict_or_None).
-    stage: one of bias_not_aligned / session / chop / breakout /
-           retest / rejection / sweep / rr / signal
-    """
     if not bias_data["aligned"]:
         return "bias_not_aligned", None
 
@@ -247,10 +242,6 @@ def run_pipeline(pair, candles_5m, bias_data, current_epoch):
 # =============================================================
 
 def simulate_trade(candles_5m, entry_idx, direction, entry, sl, tp):
-    """
-    Walk forward from entry_idx+1 until TP or SL is hit, or MAX_HOLD_BARS reached.
-    Conservative: if a single candle touches both TP and SL, count as LOSS.
-    """
     start = entry_idx + 1
     end = min(len(candles_5m), start + MAX_HOLD_BARS)
 

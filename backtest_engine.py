@@ -6,7 +6,7 @@ at each scan point, counts funnel rejections, and simulates each signal
 forward to TP/SL to measure win rate and expectancy.
 
 Configurable SWEEP_MODE:
-  - "strict"   : current production sweep (default)
+  - "force"   : current production sweep (default)
   - "adaptive" : middle-ground sweep (build separately)
   - "force"    : ignore sweep stage entirely (for win-rate baseline)
 

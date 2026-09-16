@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16T08:58:02.680581+00:00",
+  "generated": "2026-09-16T09:59:52.575721+00:00",
   "months_back": 12,
   "sweep_mode": "force",
   "sl_model": "atr_floor",
@@ -8,52 +8,184 @@
     "EURUSD",
     "GBPUSD",
     "USDJPY",
-    "USDCAD"
+    "AUDUSD",
+    "USDCAD",
+    "USDCHF",
+    "NZDUSD",
+    "EURGBP",
+    "EURJPY",
+    "GBPJPY",
+    "AUDJPY",
+    "EURAUD",
+    "EURCHF",
+    "CADJPY",
+    "CHFJPY"
   ],
   "funnels": {
     "EURUSD": {
-      "bias_not_aligned": 8728,
-      "session": 2179,
+      "bias_not_aligned": 8715,
+      "session": 2184,
       "chop": 35,
-      "breakout": 1097,
-      "retest": 293,
+      "breakout": 1102,
+      "retest": 283,
+      "rejection": 201,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 180
+    },
+    "GBPUSD": {
+      "bias_not_aligned": 9011,
+      "session": 1962,
+      "chop": 20,
+      "breakout": 1133,
+      "retest": 292,
+      "rejection": 184,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 172
+    },
+    "USDJPY": {
+      "bias_not_aligned": 8380,
+      "session": 2306,
+      "chop": 115,
+      "breakout": 1221,
+      "retest": 263,
+      "rejection": 207,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 183
+    },
+    "AUDUSD": {
+      "bias_not_aligned": 8549,
+      "session": 2380,
+      "chop": 15,
+      "breakout": 1363,
+      "retest": 327,
+      "rejection": 213,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 146
+    },
+    "USDCAD": {
+      "bias_not_aligned": 8306,
+      "session": 2297,
+      "chop": 79,
+      "breakout": 1068,
+      "retest": 283,
+      "rejection": 238,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 206
+    },
+    "USDCHF": {
+      "bias_not_aligned": 8609,
+      "session": 2264,
+      "chop": 3,
+      "breakout": 1258,
+      "retest": 322,
+      "rejection": 238,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 162
+    },
+    "NZDUSD": {
+      "bias_not_aligned": 8287,
+      "session": 2276,
+      "chop": 0,
+      "breakout": 1398,
+      "retest": 335,
       "rejection": 206,
       "sweep": 0,
       "rr": 0,
-      "signal": 178
+      "signal": 182
     },
-    "GBPUSD": {
-      "bias_not_aligned": 9004,
-      "session": 1959,
-      "chop": 20,
-      "breakout": 1128,
-      "retest": 296,
-      "rejection": 186,
+    "EURGBP": {
+      "bias_not_aligned": 9038,
+      "session": 2102,
+      "chop": 126,
+      "breakout": 944,
+      "retest": 188,
+      "rejection": 210,
       "sweep": 0,
       "rr": 0,
-      "signal": 173
+      "signal": 171
     },
-    "USDJPY": {
-      "bias_not_aligned": 8393,
-      "session": 2295,
-      "chop": 112,
-      "breakout": 1208,
+    "EURJPY": {
+      "bias_not_aligned": 8626,
+      "session": 2009,
+      "chop": 57,
+      "breakout": 1243,
+      "retest": 269,
+      "rejection": 192,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 193
+    },
+    "GBPJPY": {
+      "bias_not_aligned": 8861,
+      "session": 2065,
+      "chop": 21,
+      "breakout": 1215,
       "retest": 256,
-      "rejection": 197,
+      "rejection": 190,
       "sweep": 0,
       "rr": 0,
-      "signal": 186
+      "signal": 171
     },
-    "USDCAD": {
-      "bias_not_aligned": 8301,
-      "session": 2299,
-      "chop": 79,
-      "breakout": 1065,
-      "retest": 282,
-      "rejection": 234,
+    "AUDJPY": {
+      "bias_not_aligned": 8271,
+      "session": 2320,
+      "chop": 15,
+      "breakout": 1398,
+      "retest": 302,
+      "rejection": 187,
       "sweep": 0,
       "rr": 0,
-      "signal": 207
+      "signal": 183
+    },
+    "EURAUD": {
+      "bias_not_aligned": 8685,
+      "session": 2251,
+      "chop": 48,
+      "breakout": 1144,
+      "retest": 248,
+      "rejection": 174,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 177
+    },
+    "EURCHF": {
+      "bias_not_aligned": 8599,
+      "session": 2221,
+      "chop": 139,
+      "breakout": 903,
+      "retest": 219,
+      "rejection": 200,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 205
+    },
+    "CADJPY": {
+      "bias_not_aligned": 8503,
+      "session": 2223,
+      "chop": 28,
+      "breakout": 1275,
+      "retest": 286,
+      "rejection": 216,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 179
+    },
+    "CHFJPY": {
+      "bias_not_aligned": 8818,
+      "session": 2002,
+      "chop": 19,
+      "breakout": 1232,
+      "retest": 246,
+      "rejection": 214,
+      "sweep": 0,
+      "rr": 0,
+      "signal": 179
     }
   }
 }

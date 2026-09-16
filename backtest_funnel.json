@@ -1,7 +1,9 @@
 {
-  "generated": "2026-09-16T08:23:47.900009+00:00",
+  "generated": "2026-09-16T08:58:02.680581+00:00",
   "months_back": 12,
   "sweep_mode": "force",
+  "sl_model": "atr_floor",
+  "atr_mult": 1.5,
   "pairs": [
     "EURUSD",
     "GBPUSD",
@@ -10,48 +12,48 @@
   ],
   "funnels": {
     "EURUSD": {
-      "bias_not_aligned": 8712,
-      "session": 2184,
+      "bias_not_aligned": 8728,
+      "session": 2179,
       "chop": 35,
-      "breakout": 1102,
-      "retest": 283,
-      "rejection": 201,
+      "breakout": 1097,
+      "retest": 293,
+      "rejection": 206,
       "sweep": 0,
       "rr": 0,
-      "signal": 180
+      "signal": 178
     },
     "GBPUSD": {
-      "bias_not_aligned": 9009,
-      "session": 1962,
+      "bias_not_aligned": 9004,
+      "session": 1959,
       "chop": 20,
-      "breakout": 1134,
-      "retest": 293,
-      "rejection": 184,
+      "breakout": 1128,
+      "retest": 296,
+      "rejection": 186,
       "sweep": 0,
       "rr": 0,
-      "signal": 172
+      "signal": 173
     },
     "USDJPY": {
-      "bias_not_aligned": 8381,
-      "session": 2307,
+      "bias_not_aligned": 8393,
+      "session": 2295,
       "chop": 112,
-      "breakout": 1220,
-      "retest": 262,
-      "rejection": 207,
+      "breakout": 1208,
+      "retest": 256,
+      "rejection": 197,
       "sweep": 0,
       "rr": 0,
-      "signal": 183
+      "signal": 186
     },
     "USDCAD": {
-      "bias_not_aligned": 8307,
-      "session": 2298,
-      "chop": 78,
-      "breakout": 1064,
-      "retest": 283,
-      "rejection": 238,
+      "bias_not_aligned": 8301,
+      "session": 2299,
+      "chop": 79,
+      "breakout": 1065,
+      "retest": 282,
+      "rejection": 234,
       "sweep": 0,
       "rr": 0,
-      "signal": 206
+      "signal": 207
     }
   }
 }

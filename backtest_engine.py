@@ -1,6 +1,6 @@
 """
 Backtest Engine - Funnel + Expectancy Diagnostic
-4-pair baseline (AUDUSD removed after 12-month run showed it as a clear loser).
+Experiment 2: ATR-based SL floor
 """
 
 import json
@@ -43,6 +43,11 @@ MAX_HOLD_BARS = 576
 COOLDOWN_BARS = 48
 
 SWEEP_MODE = "force"
+
+# SL MODEL
+SL_MODEL = "atr_floor"    # "struct" (original) or "atr_floor" (new)
+ATR_MULT = 1.5
+ATR_PERIOD = 14
 
 
 # =============================================================
@@ -167,6 +172,27 @@ def compute_bias(pair, candles_4h, candles_1h):
 
 
 # =============================================================
+# ATR
+# =============================================================
+
+def compute_atr(candles, period=14):
+    """True ATR over last N candles."""
+    if len(candles) < period + 1:
+        return None
+    trs = []
+    for i in range(1, period + 1):
+        c = candles[-i]
+        prev = candles[-i - 1]
+        tr = max(
+            c["high"] - c["low"],
+            abs(c["high"] - prev["close"]),
+            abs(c["low"] - prev["close"]),
+        )
+        trs.append(tr)
+    return sum(trs) / len(trs)
+
+
+# =============================================================
 # PIPELINE
 # =============================================================
 
@@ -223,6 +249,28 @@ def run_pipeline(pair, candles_5m, bias_data, current_epoch):
     )
     if not trade:
         return "rr", None
+
+    # --- ATR floor override ---
+    if SL_MODEL == "atr_floor":
+        atr = compute_atr(candles_5m, period=ATR_PERIOD)
+        if atr is not None:
+            entry = trade["entry"]
+            struct_sl = trade["sl"]
+
+            if direction == "buy":
+                struct_distance = entry - struct_sl
+                atr_distance = atr * ATR_MULT
+                final_distance = max(struct_distance, atr_distance)
+                trade["sl"] = entry - final_distance
+                trade["tp"] = entry + (final_distance * RR_MIN)
+            else:
+                struct_distance = struct_sl - entry
+                atr_distance = atr * ATR_MULT
+                final_distance = max(struct_distance, atr_distance)
+                trade["sl"] = entry + final_distance
+                trade["tp"] = entry - (final_distance * RR_MIN)
+
+            trade["rr"] = RR_MIN
 
     return "signal", {
         "direction": direction,
@@ -392,6 +440,8 @@ def format_report(all_funnels, all_trades, months_back):
     lines.append(f"Scan cadence: every {SCAN_EVERY_N_BARS}th 5M candle "
                  f"(~every {SCAN_EVERY_N_BARS*5} min)  ")
     lines.append(f"Sweep mode: **{SWEEP_MODE}**  ")
+    lines.append(f"SL model: **{SL_MODEL}**" +
+                 (f" (ATR × {ATR_MULT}, period {ATR_PERIOD})" if SL_MODEL == "atr_floor" else "") + "  ")
     lines.append(f"Cooldown between signals: {COOLDOWN_BARS} bars "
                  f"(~{COOLDOWN_BARS*5/60:.1f}h)\n")
 
@@ -493,7 +543,7 @@ def main():
     print("BACKTEST ENGINE - FUNNEL + EXPECTANCY")
     print("=" * 60)
     print(f"Pairs: {len(PAIRS)}  |  History: {MONTHS_BACK} months  |  "
-          f"Sweep mode: {SWEEP_MODE}")
+          f"Sweep mode: {SWEEP_MODE}  |  SL model: {SL_MODEL}")
     print()
 
     all_funnels = {}
@@ -540,6 +590,8 @@ def main():
             "generated": datetime.now(timezone.utc).isoformat(),
             "months_back": MONTHS_BACK,
             "sweep_mode": SWEEP_MODE,
+            "sl_model": SL_MODEL,
+            "atr_mult": ATR_MULT if SL_MODEL == "atr_floor" else None,
             "pairs": list(all_funnels.keys()),
             "funnels": {p: dict(f) for p, f in all_funnels.items()},
         }, f, indent=2)

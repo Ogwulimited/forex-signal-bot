@@ -1,6 +1,6 @@
 """
 Backtest Engine - Funnel + Expectancy Diagnostic
-Experiment 2: ATR-based SL floor
+Full 15-pair universe, ATR × 1.5 SL floor.
 """
 
 import json
@@ -23,7 +23,11 @@ from chop_filter import is_choppy
 # CONFIGURATION
 # =============================================================
 
-PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "USDCAD"]
+PAIRS = [
+    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
+    "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
+    "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "CHFJPY",
+]
 
 MONTHS_BACK = 12
 SCAN_EVERY_N_BARS = 5
@@ -44,8 +48,7 @@ COOLDOWN_BARS = 48
 
 SWEEP_MODE = "force"
 
-# SL MODEL
-SL_MODEL = "atr_floor"    # "struct" (original) or "atr_floor" (new)
+SL_MODEL = "atr_floor"
 ATR_MULT = 1.5
 ATR_PERIOD = 14
 
@@ -176,7 +179,6 @@ def compute_bias(pair, candles_4h, candles_1h):
 # =============================================================
 
 def compute_atr(candles, period=14):
-    """True ATR over last N candles."""
     if len(candles) < period + 1:
         return None
     trs = []
@@ -250,7 +252,6 @@ def run_pipeline(pair, candles_5m, bias_data, current_epoch):
     if not trade:
         return "rr", None
 
-    # --- ATR floor override ---
     if SL_MODEL == "atr_floor":
         atr = compute_atr(candles_5m, period=ATR_PERIOD)
         if atr is not None:

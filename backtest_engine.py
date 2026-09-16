@@ -1,19 +1,6 @@
 """
 Backtest Engine - Funnel + Expectancy Diagnostic
-
-Walks historical 5M candles pair-by-pair, reconstructs the live pipeline
-at each scan point, counts funnel rejections, and simulates each signal
-forward to TP/SL to measure win rate and expectancy.
-
-Configurable SWEEP_MODE:
-  - "strict"   : current production sweep
-  - "adaptive" : middle-ground sweep
-  - "force"    : ignore sweep stage entirely (win-rate baseline)
-
-Outputs:
-  - backtest_report.md
-  - backtest_funnel.json
-  - backtest_trades.json
+4-pair baseline (AUDUSD removed after 12-month run showed it as a clear loser).
 """
 
 import json
@@ -36,7 +23,7 @@ from chop_filter import is_choppy
 # CONFIGURATION
 # =============================================================
 
-PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD"]
+PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "USDCAD"]
 
 MONTHS_BACK = 12
 SCAN_EVERY_N_BARS = 5
@@ -44,7 +31,6 @@ WINDOW_5M = 100
 WINDOW_4H = 40
 WINDOW_1H = 40
 
-# Strategy parameters (must match production)
 BREAKOUT_WINDOW = 5
 MIN_BARS_AFTER_SWING = 3
 RETEST_TOLERANCE_RATIO = 0.0003
@@ -53,11 +39,9 @@ RR_MIN = 2.0
 CHOP_LOOKBACK = 20
 CHOP_MIN_RANGE_RATIO = 0.0005
 
-# Trade simulation
-MAX_HOLD_BARS = 576        # 48 hours of 5M candles
-COOLDOWN_BARS = 48         # ~4h anti-spam, matches production
+MAX_HOLD_BARS = 576
+COOLDOWN_BARS = 48
 
-# Sweep mode: "strict" | "adaptive" | "force"
 SWEEP_MODE = "force"
 
 
@@ -104,10 +88,6 @@ def _fetch_chunk(symbol, granularity, count, end):
 
 
 def fetch_history(pair, timeframe, months_back, max_iterations=500):
-    """
-    Fetch historical candles with proper pagination and deduplication.
-    Handles the case where Deriv returns fewer candles per request than requested.
-    """
     symbol = SYMBOL_MAP.get(pair.upper())
     if not symbol:
         raise ValueError(f"Unknown pair: {pair}")
@@ -136,7 +116,6 @@ def fetch_history(pair, timeframe, months_back, max_iterations=500):
             print(f"    No more data at iteration {iterations}")
             break
 
-        # Deduplicate: only keep candles we haven't seen
         new_candles = [c for c in chunk if int(c["epoch"]) not in seen_epochs]
         if not new_candles:
             print(f"    No new data at iteration {iterations}, stopping")

@@ -1,69 +1,57 @@
 {
-  "generated": "2026-09-15T23:36:30.147268+00:00",
+  "generated": "2026-09-16T08:23:47.900009+00:00",
   "months_back": 12,
   "sweep_mode": "force",
   "pairs": [
     "EURUSD",
     "GBPUSD",
     "USDJPY",
-    "AUDUSD",
     "USDCAD"
   ],
   "funnels": {
     "EURUSD": {
-      "bias_not_aligned": 8640,
-      "session": 2164,
-      "chop": 36,
-      "breakout": 1088,
-      "retest": 273,
-      "rejection": 197,
+      "bias_not_aligned": 8712,
+      "session": 2184,
+      "chop": 35,
+      "breakout": 1102,
+      "retest": 283,
+      "rejection": 201,
       "sweep": 0,
       "rr": 0,
-      "signal": 185
+      "signal": 180
     },
     "GBPUSD": {
-      "bias_not_aligned": 8878,
-      "session": 1979,
+      "bias_not_aligned": 9009,
+      "session": 1962,
       "chop": 20,
-      "breakout": 1152,
-      "retest": 303,
-      "rejection": 192,
+      "breakout": 1134,
+      "retest": 293,
+      "rejection": 184,
       "sweep": 0,
       "rr": 0,
       "signal": 172
     },
     "USDJPY": {
-      "bias_not_aligned": 8382,
-      "session": 2243,
-      "chop": 113,
-      "breakout": 1195,
-      "retest": 257,
-      "rejection": 190,
+      "bias_not_aligned": 8381,
+      "session": 2307,
+      "chop": 112,
+      "breakout": 1220,
+      "retest": 262,
+      "rejection": 207,
       "sweep": 0,
       "rr": 0,
-      "signal": 187
-    },
-    "AUDUSD": {
-      "bias_not_aligned": 8448,
-      "session": 2379,
-      "chop": 14,
-      "breakout": 1380,
-      "retest": 312,
-      "rejection": 212,
-      "sweep": 0,
-      "rr": 0,
-      "signal": 149
+      "signal": 183
     },
     "USDCAD": {
-      "bias_not_aligned": 8310,
-      "session": 2282,
-      "chop": 75,
-      "breakout": 1076,
-      "retest": 266,
-      "rejection": 247,
+      "bias_not_aligned": 8307,
+      "session": 2298,
+      "chop": 78,
+      "breakout": 1064,
+      "retest": 283,
+      "rejection": 238,
       "sweep": 0,
       "rr": 0,
-      "signal": 200
+      "signal": 206
     }
   }
 }

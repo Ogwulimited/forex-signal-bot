@@ -1,21 +1,20 @@
 """
-Trendline Detector v2
+Trendline Detector v3
 
-Finds trendlines anchored on swing points, requires meaningful slope,
-and counts touches only at swing points (not arbitrary candles).
-
-- SUPPORT: line through swing lows
-- RESISTANCE: line through swing highs
+- Loosened violation tolerance (allows noise)
+- Requires no long streaks of violations
+- Wider lookback window
 """
 
 from swing_detector import find_swing_highs, find_swing_lows
 
 
-MIN_SLOPE_PCT = 0.00001   # min |slope| per candle, relative to price
-TOLERANCE_PCT = 0.0003    # touch tolerance
-MIN_TOUCHES = 3           # minimum swing-point touches
-MAX_VIOLATIONS = 1
-MIN_SPAN = 20             # min candles spanned by anchors
+MIN_SLOPE_PCT = 0.00001
+TOLERANCE_PCT = 0.0003
+MIN_TOUCHES = 3
+MAX_VIOLATIONS = 5
+MAX_CONSECUTIVE_VIOLATIONS = 3
+MIN_SPAN = 10
 
 
 def _linear_fit(points):
@@ -38,8 +37,7 @@ def _line_value(slope, intercept, x):
     return slope * x + intercept
 
 
-def _count_swing_touches(candles, swings, slope, intercept, side, tolerance_pct):
-    """Count touches only at swing points, and violations at close prices."""
+def _count_touches_and_violations(candles, swings, slope, intercept, side, tolerance_pct):
     touches = 0
     for s in swings:
         line_y = _line_value(slope, intercept, s["index"])
@@ -49,27 +47,40 @@ def _count_swing_touches(candles, swings, slope, intercept, side, tolerance_pct)
             touches += 1
 
     violations = 0
+    max_consecutive = 0
+    current_streak = 0
+
     for i, c in enumerate(candles):
         line_y = _line_value(slope, intercept, i)
         if line_y <= 0:
+            current_streak = 0
             continue
+        is_violation = False
         if side == "high":
             if c["close"] > line_y * (1 + tolerance_pct):
-                violations += 1
+                is_violation = True
         else:
             if c["close"] < line_y * (1 - tolerance_pct):
-                violations += 1
-    return touches, violations
+                is_violation = True
+
+        if is_violation:
+            violations += 1
+            current_streak += 1
+            if current_streak > max_consecutive:
+                max_consecutive = current_streak
+        else:
+            current_streak = 0
+
+    return touches, violations, max_consecutive
 
 
-def find_best_trendline(candles, side="high", lookback=100,
+def find_best_trendline(candles, side="high", lookback=250,
                         min_touches=MIN_TOUCHES,
                         max_violations=MAX_VIOLATIONS,
+                        max_consecutive=MAX_CONSECUTIVE_VIOLATIONS,
                         min_span=MIN_SPAN,
                         debug=False):
     if len(candles) < 20:
-        if debug:
-            print(f"  [TL-{side}] not enough candles ({len(candles)})")
         return None
 
     window = candles[-lookback:]
@@ -82,22 +93,21 @@ def find_best_trendline(candles, side="high", lookback=100,
         swings = find_swing_lows(window, left=2, right=2)
 
     if debug:
-        print(f"  [TL-{side}] found {len(swings)} swings, avg_price={avg_price:.5f}")
+        print(f"  [TL-{side}] swings={len(swings)} avg_price={avg_price:.5f}")
 
     if len(swings) < min_touches:
-        if debug:
-            print(f"  [TL-{side}] fewer swings ({len(swings)}) than min_touches ({min_touches})")
         return None
 
-    recent = swings[-8:] if len(swings) > 8 else swings
+    recent = swings[-10:] if len(swings) > 10 else swings
 
     best = None
     best_score = -1
     tested = 0
-    rejected_slope = 0
-    rejected_span = 0
-    rejected_touches = 0
-    rejected_violations = 0
+    rej_slope = 0
+    rej_span = 0
+    rej_touch = 0
+    rej_viol = 0
+    rej_consec = 0
 
     for i in range(len(recent) - 1):
         for j in range(i + 1, len(recent)):
@@ -106,7 +116,7 @@ def find_best_trendline(candles, side="high", lookback=100,
                 continue
             span = abs(b["index"] - a["index"])
             if span < min_span:
-                rejected_span += 1
+                rej_span += 1
                 continue
 
             fit = _linear_fit([(a["index"], a["level"]), (b["index"], b["level"])])
@@ -115,22 +125,25 @@ def find_best_trendline(candles, side="high", lookback=100,
             slope, intercept = fit
 
             if abs(slope) < min_slope_abs:
-                rejected_slope += 1
+                rej_slope += 1
                 continue
 
-            touches, violations = _count_swing_touches(
+            touches, violations, consec = _count_touches_and_violations(
                 window, swings, slope, intercept, side, TOLERANCE_PCT
             )
             tested += 1
 
             if touches < min_touches:
-                rejected_touches += 1
+                rej_touch += 1
                 continue
             if violations > max_violations:
-                rejected_violations += 1
+                rej_viol += 1
+                continue
+            if consec > max_consecutive:
+                rej_consec += 1
                 continue
 
-            score = touches * 10 - violations * 20 + min(span, 100)
+            score = touches * 10 - violations * 5 + min(span, 100)
 
             if score > best_score:
                 best_score = score
@@ -140,6 +153,7 @@ def find_best_trendline(candles, side="high", lookback=100,
                     "side": side,
                     "touches": touches,
                     "violations": violations,
+                    "max_consecutive_violations": consec,
                     "span": span,
                     "score": score,
                     "anchor_a_idx": a["index"],
@@ -149,20 +163,21 @@ def find_best_trendline(candles, side="high", lookback=100,
                 }
 
     if debug:
-        print(f"  [TL-{side}] candidates tested={tested} | "
-              f"rejected slope={rejected_slope} span={rejected_span} "
-              f"touches={rejected_touches} violations={rejected_violations}")
+        print(f"  [TL-{side}] tested={tested} | "
+              f"rej_span={rej_span} rej_slope={rej_slope} "
+              f"rej_touch={rej_touch} rej_viol={rej_viol} rej_consec={rej_consec}")
         if best:
             print(f"  [TL-{side}] WINNER: score={best['score']} "
                   f"touches={best['touches']} violations={best['violations']} "
-                  f"slope={best['slope']:.6f}")
+                  f"max_consec={best['max_consecutive_violations']} "
+                  f"span={best['span']} slope={best['slope']:.6f}")
         else:
             print(f"  [TL-{side}] no winner")
 
     return best
 
 
-def find_trendlines(candles, lookback=100, debug=False):
+def find_trendlines(candles, lookback=250, debug=False):
     resistance = find_best_trendline(candles, side="high", lookback=lookback, debug=debug)
     support = find_best_trendline(candles, side="low", lookback=lookback, debug=debug)
     return {

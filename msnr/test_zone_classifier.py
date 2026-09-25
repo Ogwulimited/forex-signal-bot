@@ -1,12 +1,10 @@
 """
 Test the zone classifier across all pairs.
-Uses the storyline engine to determine direction, then classifies
-working-timeframe (H4) zones into entries and obstacles.
 """
 from market_data import fetch_candles
 from storyline_engine import detect_daily_storyline
 from zone_detector import detect_all_zones
-from zone_filter import filter_zones
+from zone_filter import filter_zones, PIP_SCALE
 from zone_classifier import classify_zones
 
 PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "USDCAD", "AUDUSD"]
@@ -26,37 +24,30 @@ for pair in PAIRS:
     current_price = h4[-1]['close']
     print(f"  Current price: {current_price:.5f}")
 
-    # Storyline
     storyline = detect_daily_storyline(pair, daily, h4, debug=False)
 
     if not storyline:
-        print(f"  ❌ No active storyline — skipping classification")
+        print(f"  ❌ No active storyline — skipping")
         continue
 
     direction = storyline['storyline']
     print(f"  ✅ Active storyline: {direction.upper()}")
 
-    # Detect + filter H4 zones
     raw = detect_all_zones(h4, min_open_close_run=2, debug=False)
     zones = filter_zones(raw, h4, pair, debug=False)
     print(f"  Filtered H4 zones: {len(zones)}")
 
-    # Classify
     classified = classify_zones(direction, zones, current_price, pair, debug=True)
 
     if classified and classified['setups']:
-        print(f"\n  Trade setups (entry → obstacle):")
-        for i, s in enumerate(classified['setups'][:5], 1):
-            e = s['entry']
-            o = s['obstacle']
-            dist_entry = abs(e['level'] - current_price)
-            from zone_filter import PIP_SCALE
-            dist_pips = dist_entry / PIP_SCALE.get(pair, 0.0001)
-
-            obs_str = (f"{o['type']:>10} @ {o['level']:.5f} ({s['room_pips']}p away)"
-                       if o else "no obstacle in path")
+        pip = PIP_SCALE.get(pair, 0.0001)
+        print(f"\n  ✅ VALID SETUPS ({len(classified['setups'])}):")
+        for i, s in enumerate(classified['setups'], 1):
+            e = s['entry']; o = s['obstacle']
+            dist = abs(e['level'] - current_price) / pip
             print(f"    {i}. {e['type']:>10} @ {e['level']:.5f} "
-                  f"| {dist_pips:>5.1f}p from price | "
-                  f"target: {obs_str}")
+                  f"({dist:>5.1f}p from price) → target "
+                  f"{o['type']} @ {o['level']:.5f} "
+                  f"({s['room_pips']}p room)")
     else:
-        print(f"\n  No setups — no suitable entry zones in range")
+        print(f"\n  No valid setups (all entries filtered out)")

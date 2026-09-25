@@ -1,31 +1,16 @@
 """
-MSNR Zone Filter
+MSNR Zone Filter v2
 
-Takes raw zones from zone_detector and reduces them to the
-actionable subset:
-
-  1. Proximity    — keep only zones within X pips of current price
-  2. Clustering   — merge zones that sit within tolerance of each other
-  3. Recentness   — down-rank (or drop) zones older than N candles
-
-Zone ranking combines:
-  - cluster size (how many raw zones merged)
-  - recentness (index distance from end)
-  - (optionally) HTF confluence, added in a later module
-
-Output: list of filtered/merged zone dicts, each with a 'score' field.
+Changes from v1:
+  - Cluster score is non-linear: rewards 2-5 merges, penalises saturation (>20)
+  - Recency uses exponential decay, clamped at 0
+  - Introduces 'flip' zone type when A and V coexist in a cluster
+  - Test output will show distance from current price
 """
 
-
-# Pip scale per pair. Values based on the instructor's stated defaults
-# from the spec review (Q5). Used to convert pip-based tolerances
-# into price offsets.
 PIP_SCALE = {
-    "EURUSD": 0.0001,
-    "GBPUSD": 0.0001,
-    "USDJPY": 0.01,
-    "USDCAD": 0.0001,
-    "AUDUSD": 0.0001,
+    "EURUSD": 0.0001, "GBPUSD": 0.0001, "USDJPY": 0.01,
+    "USDCAD": 0.0001, "AUDUSD": 0.0001,
 }
 
 
@@ -33,44 +18,38 @@ def _pips_to_price(pair, pips):
     return pips * PIP_SCALE.get(pair, 0.0001)
 
 
-def filter_by_proximity(zones, current_price, pair, max_pips=150, debug=False):
-    """
-    Keep only zones within max_pips of current price.
-    """
-    max_price = _pips_to_price(pair, max_pips)
-    kept = [z for z in zones
-            if abs(z['level'] - current_price) <= max_price]
+def _cluster_score(count):
+    """Reward 2-5 merges. Penalise saturation."""
+    if count == 1:  return 2
+    if count <= 4:  return 10
+    if count <= 8:  return 8
+    if count <= 15: return 6
+    if count <= 25: return 4
+    return 2  # saturated band — likely range noise, not a clean level
 
+
+def _recency_score(index, total, half_life=100):
+    """Exponential decay from 10 (age=0) toward 0, clamped."""
+    age = total - 1 - index
+    return max(0.0, 10.0 * (0.5 ** (age / half_life)))
+
+
+def filter_by_proximity(zones, current_price, pair, max_pips=150, debug=False):
+    max_price = _pips_to_price(pair, max_pips)
+    kept = [z for z in zones if abs(z['level'] - current_price) <= max_price]
     if debug:
-        print(f"  [FILTER] Proximity (≤{max_pips} pips): "
-              f"{len(zones)} → {len(kept)}")
+        print(f"  [FILTER] Proximity (≤{max_pips} pips): {len(zones)} → {len(kept)}")
     return kept
 
 
 def cluster_zones(zones, pair, tolerance_pips=8, debug=False):
-    """
-    Merge zones that sit within tolerance_pips of each other.
-    Each cluster becomes a single merged zone.
-
-    Cluster attributes:
-      - type: majority type of the merged zones
-      - level: weighted avg by cluster size, or the level of the
-               most-recent zone in the cluster
-      - patterns: list of patterns contributing
-      - count: number of raw zones merged
-      - latest_index: most recent index in the cluster
-    """
     if not zones:
         return []
 
     tolerance = _pips_to_price(pair, tolerance_pips)
-
-    # Sort by level ascending
     sorted_zones = sorted(zones, key=lambda z: z['level'])
 
-    clusters = []
-    current = [sorted_zones[0]]
-
+    clusters, current = [], [sorted_zones[0]]
     for z in sorted_zones[1:]:
         if abs(z['level'] - current[-1]['level']) <= tolerance:
             current.append(z)
@@ -81,77 +60,50 @@ def cluster_zones(zones, pair, tolerance_pips=8, debug=False):
 
     merged = []
     for cluster in clusters:
-        # Majority type
-        types = [z['type'] for z in cluster]
-        dom_type = 'resistance' if types.count('resistance') >= types.count('support') else 'support'
-
-        # Most recent zone in cluster drives the level & index
+        patterns = set(z['pattern'] for z in cluster)
         latest = max(cluster, key=lambda z: z['index'])
 
+        # Flip zone: contains both A and V patterns (RBS/SBR territory)
+        if 'A' in patterns and 'V' in patterns:
+            zone_type = 'flip'
+        else:
+            types = [z['type'] for z in cluster]
+            zone_type = 'resistance' if types.count('resistance') > types.count('support') else 'support'
+
         merged.append({
-            'type': dom_type,
+            'type': zone_type,
             'level': latest['level'],
             'index': latest['index'],
             'cluster_count': len(cluster),
-            'patterns': sorted(set(z['pattern'] for z in cluster)),
+            'patterns': sorted(patterns),
             'cluster_zones': cluster,
         })
 
     if debug:
-        print(f"  [FILTER] Clustering (≤{tolerance_pips} pips): "
-              f"{len(zones)} → {len(merged)}")
+        print(f"  [FILTER] Clustering (≤{tolerance_pips} pips): {len(zones)} → {len(merged)}")
     return merged
 
 
 def score_and_rank(zones, total_candles, debug=False):
-    """
-    Score each zone on:
-      - cluster size (more raw zones merged = stronger level)
-      - recentness (closer to end = stronger)
-    
-    Score is additive; higher = stronger.
-    """
     scored = []
     for z in zones:
-        # Cluster contribution: capped so a huge cluster doesn't dominate
-        cluster_score = min(z['cluster_count'], 5) * 2  # max 10
-
-        # Recentness contribution: 0–10 based on how recent
-        # (100% at index == total, 0% at index == 0)
-        age = total_candles - 1 - z['index']
-        # Score 10 at age 0, 0 at age 200, linear in between
-        recency_score = max(0, 10 - (age / 20))
-
-        total = cluster_score + recency_score
-        scored.append({
-            **z,
-            'score': round(total, 2),
-        })
+        c_score = _cluster_score(z['cluster_count'])
+        r_score = _recency_score(z['index'], total_candles)
+        # Weight cluster higher (levels tested multiple times = stronger)
+        total_score = (c_score * 0.6) + (r_score * 0.4)
+        scored.append({**z, 'score': round(total_score, 2)})
 
     scored.sort(key=lambda z: z['score'], reverse=True)
-
     if debug:
-        print(f"  [FILTER] Scored {len(scored)} zones. Top 3:")
-        for z in scored[:3]:
-            print(f"    {z['type']:>10} @ {z['level']:.5f} "
-                  f"score={z['score']} cluster={z['cluster_count']} "
-                  f"patterns={z['patterns']}")
+        print(f"  [FILTER] Scored {len(scored)} zones.")
     return scored
 
 
 def filter_zones(raw_zones, candles, pair, debug=False):
-    """
-    Full filter pipeline. Returns a ranked list of merged/scored zones.
-    """
     if not raw_zones or not candles:
         return []
-
     current_price = candles[-1]['close']
     total = len(candles)
-
-    proximity = filter_by_proximity(raw_zones, current_price, pair,
-                                    max_pips=150, debug=debug)
-    clustered = cluster_zones(proximity, pair, tolerance_pips=8, debug=debug)
-    ranked = score_and_rank(clustered, total, debug=debug)
-
-    return ranked
+    prox = filter_by_proximity(raw_zones, current_price, pair, 150, debug)
+    clust = cluster_zones(prox, pair, 8, debug)
+    return score_and_rank(clust, total, debug)

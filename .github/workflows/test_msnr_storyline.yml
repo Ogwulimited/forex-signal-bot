@@ -1,0 +1,25 @@
+name: Test MSNR Storyline Engine
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests websocket-client
+
+      - name: Run MSNR storyline test
+        run: |
+          cd msnr
+          python test_storyline_engine.py

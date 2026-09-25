@@ -1,50 +1,48 @@
 """
-MSNR Storyline Engine v2
+MSNR Storyline Engine v3
 
 Two-factor test for Daily storyline:
   Factor 1: Daily rejection of a Daily zone
   Factor 2: H4 QM in the matching direction
 
-Changes from v1:
-  - Only the CLOSEST zone per direction per candle counts as a rejection
-  - Wick overshoot tolerance: zone level must be within ~30 pips of wick extreme
-  - QM must have occurred AT OR AFTER the Daily rejection candle
+Changes from v2:
+  - Wick overshoot filter REMOVED (was killing valid rejections on
+    Daily candles, whose wick ranges are naturally wider than H4/H1)
+  - Closest-zone-per-direction-per-candle logic retained (this alone
+    eliminates mid-range noise)
+  - QM timing check retained (QM must be at or after Daily rejection)
 """
 
 from zone_detector import detect_all_zones
-from zone_filter import filter_zones, PIP_SCALE
+from zone_filter import filter_zones
 from qm_detector import detect_qm
 
 
 REJECTION_LOOKBACK_DAYS = 3
 MAX_QM_AGE_H4 = 12               # 48 hours
-WICK_OVERSHOOT_PIPS = 30         # max pips wick can exceed zone level
 
 
 def _check_daily_rejection(daily_candles, daily_zones, pair, debug=False):
     """
-    For each recent Daily candle, find the closest zone rejected.
+    For each recent Daily candle, find the closest zone rejected per direction.
     Returns at most 1 bearish + 1 bullish rejection per candle.
     """
     rejections = []
     n = len(daily_candles)
     start = max(0, n - REJECTION_LOOKBACK_DAYS)
-    tol = WICK_OVERSHOOT_PIPS * PIP_SCALE.get(pair, 0.0001)
 
     for i in range(start, n):
         candle = daily_candles[i]
 
-        # ---- Bearish rejection candidates ----
-        bear_candidates = []
-        for zone in daily_zones:
-            if zone['type'] not in ('resistance', 'flip'):
-                continue
-            if candle['high'] >= zone['level'] and candle['close'] < zone['level']:
-                # Reject if wick overshot zone by more than tolerance
-                if candle['high'] - zone['level'] <= tol:
-                    bear_candidates.append(zone)
-
+        # ---- Bearish: candle wicked into a resistance, closed below ----
+        bear_candidates = [
+            z for z in daily_zones
+            if z['type'] in ('resistance', 'flip')
+            and candle['high'] >= z['level']
+            and candle['close'] < z['level']
+        ]
         if bear_candidates:
+            # Closest to close = highest zone level that still fits the criteria
             best = max(bear_candidates, key=lambda z: z['level'])
             rejections.append({
                 'direction': 'bearish',
@@ -53,15 +51,13 @@ def _check_daily_rejection(daily_candles, daily_zones, pair, debug=False):
                 'candle': candle,
             })
 
-        # ---- Bullish rejection candidates ----
-        bull_candidates = []
-        for zone in daily_zones:
-            if zone['type'] not in ('support', 'flip'):
-                continue
-            if candle['low'] <= zone['level'] and candle['close'] > zone['level']:
-                if zone['level'] - candle['low'] <= tol:
-                    bull_candidates.append(zone)
-
+        # ---- Bullish: candle wicked into a support, closed above ----
+        bull_candidates = [
+            z for z in daily_zones
+            if z['type'] in ('support', 'flip')
+            and candle['low'] <= z['level']
+            and candle['close'] > z['level']
+        ]
         if bull_candidates:
             best = min(bull_candidates, key=lambda z: z['level'])
             rejections.append({
@@ -124,14 +120,13 @@ def detect_daily_storyline(pair, daily_candles, h4_candles, debug=False):
         if not qm:
             continue
 
-        # Age check on H4 QM
         if qm['candles_since_break'] > MAX_QM_AGE_H4:
             if debug:
                 print(f"  [STORY] {direction} QM too old "
                       f"({qm['candles_since_break']} H4 candles)")
             continue
 
-        # Timing check: QM must be at or after the rejection candle
+        # Timing: QM must be at or after the rejection candle
         rej_epoch = _candle_epoch(rej['candle'])
         qm_epoch = _candle_epoch(qm['break_candle'])
         if qm_epoch and rej_epoch and qm_epoch < rej_epoch:

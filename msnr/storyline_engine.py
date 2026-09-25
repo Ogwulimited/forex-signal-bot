@@ -1,16 +1,10 @@
 """
-MSNR Storyline Engine v3
+MSNR Storyline Engine v4
 
-Two-factor test for Daily storyline:
-  Factor 1: Daily rejection of a Daily zone
-  Factor 2: H4 QM in the matching direction
-
-Changes from v2:
-  - Wick overshoot filter REMOVED (was killing valid rejections on
-    Daily candles, whose wick ranges are naturally wider than H4/H1)
-  - Closest-zone-per-direction-per-candle logic retained (this alone
-    eliminates mid-range noise)
-  - QM timing check retained (QM must be at or after Daily rejection)
+Two-factor test for Daily storyline.
+Changes from v3:
+  - Closest-zone logic FIXED: bullish picks highest support below close,
+    bearish picks lowest resistance above close
 """
 
 from zone_detector import detect_all_zones
@@ -19,12 +13,12 @@ from qm_detector import detect_qm
 
 
 REJECTION_LOOKBACK_DAYS = 3
-MAX_QM_AGE_H4 = 12               # 48 hours
+MAX_QM_AGE_H4 = 12
 
 
 def _check_daily_rejection(daily_candles, daily_zones, pair, debug=False):
     """
-    For each recent Daily candle, find the closest zone rejected per direction.
+    For each recent Daily candle, find the CLOSEST zone rejected per direction.
     Returns at most 1 bearish + 1 bullish rejection per candle.
     """
     rejections = []
@@ -34,7 +28,8 @@ def _check_daily_rejection(daily_candles, daily_zones, pair, debug=False):
     for i in range(start, n):
         candle = daily_candles[i]
 
-        # ---- Bearish: candle wicked into a resistance, closed below ----
+        # Bearish: close below a resistance. Closest = LOWEST resistance
+        # above the close (smallest distance from close upward).
         bear_candidates = [
             z for z in daily_zones
             if z['type'] in ('resistance', 'flip')
@@ -42,8 +37,7 @@ def _check_daily_rejection(daily_candles, daily_zones, pair, debug=False):
             and candle['close'] < z['level']
         ]
         if bear_candidates:
-            # Closest to close = highest zone level that still fits the criteria
-            best = max(bear_candidates, key=lambda z: z['level'])
+            best = min(bear_candidates, key=lambda z: z['level'])
             rejections.append({
                 'direction': 'bearish',
                 'zone': best,
@@ -51,7 +45,8 @@ def _check_daily_rejection(daily_candles, daily_zones, pair, debug=False):
                 'candle': candle,
             })
 
-        # ---- Bullish: candle wicked into a support, closed above ----
+        # Bullish: close above a support. Closest = HIGHEST support
+        # below the close.
         bull_candidates = [
             z for z in daily_zones
             if z['type'] in ('support', 'flip')
@@ -59,7 +54,7 @@ def _check_daily_rejection(daily_candles, daily_zones, pair, debug=False):
             and candle['close'] > z['level']
         ]
         if bull_candidates:
-            best = min(bull_candidates, key=lambda z: z['level'])
+            best = max(bull_candidates, key=lambda z: z['level'])
             rejections.append({
                 'direction': 'bullish',
                 'zone': best,
@@ -77,18 +72,13 @@ def _check_daily_rejection(daily_candles, daily_zones, pair, debug=False):
 
 
 def _candle_epoch(candle):
-    """Extract epoch from a candle dict; return 0 if missing."""
     return candle.get('datetime', 0)
 
 
 def detect_daily_storyline(pair, daily_candles, h4_candles, debug=False):
-    """
-    Detect the currently active Daily storyline.
-    """
     if len(daily_candles) < 30 or len(h4_candles) < 30:
         return None
 
-    # ─── Factor 1: Daily rejection ───
     daily_zones_raw = detect_all_zones(daily_candles, min_open_close_run=2, debug=False)
     daily_zones = filter_zones(daily_zones_raw, daily_candles, pair, debug=False)
 
@@ -101,7 +91,6 @@ def detect_daily_storyline(pair, daily_candles, h4_candles, debug=False):
             print(f"  [STORY] No Daily rejection — no storyline")
         return None
 
-    # ─── Factor 2: H4 QM ───
     h4_bull_qm = detect_qm(h4_candles, 'bullish', pair=pair, debug=False)
     h4_bear_qm = detect_qm(h4_candles, 'bearish', pair=pair, debug=False)
 
@@ -109,7 +98,6 @@ def detect_daily_storyline(pair, daily_candles, h4_candles, debug=False):
         print(f"  [STORY] H4 QMs: "
               f"bullish={bool(h4_bull_qm)} bearish={bool(h4_bear_qm)}")
 
-    # ─── Combine ───
     rejections_sorted = sorted(rejections,
                                key=lambda r: r['candle_index'],
                                reverse=True)
@@ -126,7 +114,6 @@ def detect_daily_storyline(pair, daily_candles, h4_candles, debug=False):
                       f"({qm['candles_since_break']} H4 candles)")
             continue
 
-        # Timing: QM must be at or after the rejection candle
         rej_epoch = _candle_epoch(rej['candle'])
         qm_epoch = _candle_epoch(qm['break_candle'])
         if qm_epoch and rej_epoch and qm_epoch < rej_epoch:

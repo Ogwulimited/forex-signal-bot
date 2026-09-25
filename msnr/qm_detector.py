@@ -14,6 +14,12 @@ recent opposing swing, breaking that structure.
 
 MSNR treats "QM" and "breakout" as the same thing.
 Close-based only. Wicks do not count.
+
+Instructor's QM definition (Session 3 Topic 15):
+  "lower highs, lower lows, lower highs, lower lows, then a higher high"
+  Minimum = 2 lower highs + 2 lower lows.
+  We require 3 of each for a small confidence margin over the minimum,
+  since real markets rarely produce 4 strict monotonic swings in a row.
 """
 
 from swing_detector import find_swing_highs, find_swing_lows
@@ -35,7 +41,7 @@ def _is_ascending(values, tolerance=0.0):
     return True
 
 
-def detect_qm(candles, direction, lookback=150, min_swings=4,
+def detect_qm(candles, direction, lookback=150, min_swings=6,
               tolerance_pips=0.0, pair=None, debug=False):
     """
     Detect a QM in the given direction.
@@ -44,7 +50,8 @@ def detect_qm(candles, direction, lookback=150, min_swings=4,
     - candles: list of candle dicts (need 'open', 'high', 'low', 'close')
     - direction: 'bullish' or 'bearish' — which way the QM breaks
     - lookback: how many recent candles to consider for swings
-    - min_swings: minimum number of swings needed to confirm structure
+    - min_swings: kept for API compatibility (unused in v2; structure
+                  check requires 3 swings on each side)
     - tolerance_pips: allowed noise in swing comparison (e.g., equal highs)
     - pair: used to convert tolerance_pips to price
     - debug: print reasoning
@@ -82,14 +89,18 @@ def detect_qm(candles, direction, lookback=150, min_swings=4,
         print(f"  [QM-{direction}] swings in last {len(window)} candles: "
               f"{len(swing_highs)} highs, {len(swing_lows)} lows")
 
-    if len(swing_highs) < min_swings // 2 or len(swing_lows) < min_swings // 2:
+    # Need at least 3 swings on each side to evaluate 3-point structure
+    if len(swing_highs) < 3 or len(swing_lows) < 3:
         if debug:
-            print(f"  [QM-{direction}] insufficient swings")
+            print(f"  [QM-{direction}] insufficient swings "
+                  f"(need 3 highs and 3 lows)")
         return None
 
-    # Take the last few swings to evaluate structure
-    recent_highs = swing_highs[-4:]
-    recent_lows = swing_lows[-4:]
+    # Take the last 3 swings to evaluate structure
+    # Instructor's QM definition: minimum 2 lower highs + 2 lower lows.
+    # 3 of each adds a small confidence margin over the minimum.
+    recent_highs = swing_highs[-3:]
+    recent_lows = swing_lows[-3:]
 
     high_levels = [s['level'] for s in recent_highs]
     low_levels = [s['level'] for s in recent_lows]
@@ -112,7 +123,6 @@ def detect_qm(candles, direction, lookback=150, min_swings=4,
         break_level = last_high['level']
         break_swing_window_idx = last_high['index']
 
-        # Search for a candle AFTER the break-swing that closes above break_level
         # Convert window index to full-candle index for downstream use
         break_swing_full_idx = window_start + break_swing_window_idx
 

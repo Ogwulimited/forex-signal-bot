@@ -1,8 +1,8 @@
 """
 Market Data Module – Powered by Deriv API
-Drop-in replacement for the Twelve Data version.
-All other modules (mtf_bias_engine, detectors, etc.) will work unchanged.
+Self-contained copy for msnr/
 """
+
 import json
 import time
 import websocket
@@ -22,6 +22,7 @@ SYMBOL_MAP = {
     "USDSEK": "frxUSDSEK", "USDSGD": "frxUSDSGD", "USDPLN": "frxUSDPLN",
     "EURNZD": "frxEURNZD", "GBPNZD": "frxGBPNZD", "CADCHF": "frxCADCHF",
     "NZDCAD": "frxNZDCAD", "NZDCHF": "frxNZDCHF", "GBPSEK": "frxGBPSEK",
+    "XAUUSD": "frxXAUUSD",
 }
 
 TIMEFRAME_MAP = {
@@ -29,12 +30,8 @@ TIMEFRAME_MAP = {
     "1h": 3600, "4h": 14400, "1day": 86400,
 }
 
+
 def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
-    """
-    Fetch historical candles from Deriv's public WebSocket API.
-    Returns list of dicts: {'datetime','open','high','low','close'} or [].
-    Compatible with all existing modules.
-    """
     symbol = SYMBOL_MAP.get(pair.upper())
     if not symbol:
         print(f"Unknown pair: {pair}")
@@ -48,7 +45,6 @@ def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
     for attempt in range(retries):
         try:
             ws = websocket.create_connection(WS_URL, timeout=15)
-
             request = {
                 "ticks_history": symbol,
                 "adjust_start_time": 1,
@@ -63,7 +59,6 @@ def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
             for _ in range(5):
                 raw = ws.recv()
                 response = json.loads(raw)
-
                 if "candles" in response:
                     ws.close()
                     return [
@@ -76,12 +71,10 @@ def fetch_candles(pair, interval="5min", outputsize=100, retries=3):
                         }
                         for c in response["candles"]
                     ]
-
                 if "error" in response:
                     print(f"Deriv error for {pair}: {response['error'].get('message')}")
                     ws.close()
                     return []
-
             ws.close()
 
         except Exception as e:

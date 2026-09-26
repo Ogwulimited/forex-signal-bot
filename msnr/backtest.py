@@ -1,10 +1,14 @@
 """
-MSNR Backtest Engine
+MSNR Backtest Engine v2
 
-Walks 6 months of H4 candles for 5 pairs, running the full MSNR
-pipeline at each H4 close. Produces:
-  - backtest_report.md
-  - backtest_trades.json
+Changes:
+  - FIXED: h1_slice now passes full history to confirmation engine,
+    which slices the window internally. Previous version truncated
+    h1 to only candles before the window opened, so confirmation
+    could never fire.
+  - Added stage counters (storyline_active, setups_found,
+    rejections_found, confirmations_found, signals_taken) for
+    diagnosis.
 """
 
 import json
@@ -30,20 +34,10 @@ PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "USDCAD", "AUDUSD"]
 MONTHS_BACK = 6
 H4_SECONDS = 4 * 3600
 DAY_SECONDS = 86400
-COOLDOWN_SECONDS = 48 * 3600     # 48h between signals per pair
-MAX_HOLD_H4 = 12                 # 48 hours max hold
-WARMUP_H4 = 60                   # need this many before scanning
+COOLDOWN_SECONDS = 48 * 3600
+MAX_HOLD_H4 = 12
+WARMUP_H4 = 60
 WARMUP_DAILY = 50
-
-
-# =============================================================
-# DATA LOADING
-# =============================================================
-
-def _fetch(pair, interval, approx_count):
-    """Fetch history via Deriv; pagination handled by market_data."""
-    candles = fetch_candles(pair, interval=interval, outputsize=min(5000, approx_count))
-    return candles or []
 
 
 # =============================================================
@@ -51,12 +45,7 @@ def _fetch(pair, interval, approx_count):
 # =============================================================
 
 def simulate_trade(h4_candles, entry_idx, signal):
-    """
-    Walk forward from entry_idx+1 through H4 candles.
-    Returns dict with outcome, exit_price, exit_idx, bars_held.
-    """
     direction = signal['direction']
-    entry = signal['entry']
     sl = signal['sl']
     tp = signal['tp']
 
@@ -70,7 +59,7 @@ def simulate_trade(h4_candles, entry_idx, signal):
         if direction == 'sell':
             tp_hit = low <= tp
             sl_hit = high >= sl
-        else:  # buy
+        else:
             tp_hit = high >= tp
             sl_hit = low <= sl
 
@@ -94,23 +83,19 @@ def simulate_trade(h4_candles, entry_idx, signal):
 # BACKTEST ONE PAIR
 # =============================================================
 
-def run_pair(pair, h4_candles, h1_candles, daily_candles, verbose=True):
+def run_pair(pair, h4_candles, h1_candles, daily_candles, counters, verbose=True):
     signals = []
     last_signal_epoch = -COOLDOWN_SECONDS
 
-    # Cache: daily-side computations, one per day
     daily_cache_key = None
-    daily_cache = None  # {'storyline': ..., 'daily_zones': ...}
+    daily_cache = None
 
     i = WARMUP_H4
     while i < len(h4_candles) - 1:
         current_h4 = h4_candles[i]
         t = current_h4['datetime']
-
-        # Today's day-open epoch
         day_open = t - (t % DAY_SECONDS)
 
-        # Daily slice: only completed daily candles (strictly before today)
         if day_open != daily_cache_key:
             daily_slice = [c for c in daily_candles
                            if c['datetime'] < day_open]
@@ -130,10 +115,10 @@ def run_pair(pair, h4_candles, h1_candles, daily_candles, verbose=True):
             i += 1
             continue
 
+        counters['storyline_active'] += 1
         direction = storyline['storyline']
         current_price = current_h4['close']
 
-        # H4 zones on current slice
         h4_slice = h4_candles[:i + 1]
         raw_zones = detect_all_zones(h4_slice, min_open_close_run=2, debug=False)
         filtered_zones = filter_zones(raw_zones, h4_slice, pair, debug=False)
@@ -144,24 +129,23 @@ def run_pair(pair, h4_candles, h1_candles, daily_candles, verbose=True):
             i += 1
             continue
 
-        # H1 slice: only up to when candle i closed
-        h1_close_epoch = t + H4_SECONDS
-        h1_slice = [c for c in h1_candles if c['datetime'] < h1_close_epoch]
+        counters['setups_found'] += len(classified['setups'])
 
-        signal_taken = False
         for setup in classified['setups']:
             setup['_storyline'] = direction
 
             rej = detect_h4_rejection(setup, h4_slice, pair, debug=False)
             if not rej:
                 continue
+            counters['rejections_found'] += 1
             rej['_storyline'] = direction
 
-            conf = detect_h1_confirmation(rej, h1_slice, pair, debug=False)
+            # ★ FIX: pass FULL H1 history; confirmation engine slices window itself.
+            conf = detect_h1_confirmation(rej, h1_candles, pair, debug=False)
             if not conf:
                 continue
+            counters['confirmations_found'] += 1
 
-            # Cooldown
             if t - last_signal_epoch < COOLDOWN_SECONDS:
                 continue
 
@@ -173,8 +157,8 @@ def run_pair(pair, h4_candles, h1_candles, daily_candles, verbose=True):
             outcome = simulate_trade(h4_candles, i, signal)
             signal.update(outcome)
             signals.append(signal)
+            counters['signals_taken'] += 1
             last_signal_epoch = t
-            signal_taken = True
             break
 
         i += 1
@@ -213,8 +197,9 @@ def compute_stats(signals, months_back):
             if risk > 0:
                 pip = PIP_SCALE.get(s['pair'], 0.0001)
                 risk_pips = risk / pip
-                move_pips = abs(s['exit_price'] - s['entry']) / pip
-                r_sum += (move_pips / risk_pips) if s['outcome'] != 'loss' else -1.0
+                move = (s['exit_price'] - s['entry']) if s['direction'] == 'buy' \
+                       else (s['entry'] - s['exit_price'])
+                r_sum += (move / pip) / risk_pips
 
     total = len(signals)
     return {
@@ -232,25 +217,31 @@ def compute_stats(signals, months_back):
     }
 
 
-def format_report(all_signals, months_back):
+def format_report(all_signals, months_back, counters):
     lines = []
     lines.append("# MSNR Backtest Report\n")
     lines.append(f"Generated: {datetime.now(timezone.utc).isoformat()}  ")
-    lines.append(f"History window: last {months_back} months  ")
+    lines.append(f"History: last {months_back} months  ")
     lines.append(f"Pairs: {len(PAIRS)}  ")
-    lines.append(f"Cooldown: {COOLDOWN_SECONDS//3600}h between signals per pair  ")
-    lines.append(f"Max hold: {MAX_HOLD_H4*4}h\n")
+    lines.append(f"Cooldown: {COOLDOWN_SECONDS//3600}h  |  Max hold: {MAX_HOLD_H4*4}h\n")
 
     stats = compute_stats(all_signals, months_back)
 
+    lines.append("## Pipeline Counters\n")
+    lines.append(f"- Storyline-active scans: **{counters['storyline_active']}**")
+    lines.append(f"- Setups found: **{counters['setups_found']}**")
+    lines.append(f"- Rejections detected: **{counters['rejections_found']}**")
+    lines.append(f"- Confirmations found: **{counters['confirmations_found']}**")
+    lines.append(f"- Signals taken (post-cooldown): **{counters['signals_taken']}**\n")
+
     lines.append("## Expectancy Summary\n")
     lines.append(f"- Total signals: **{stats['total']}**")
-    lines.append(f"- Signals per month: **{stats['signals_per_month']}** across {len(PAIRS)} pairs")
+    lines.append(f"- Signals/month: **{stats['signals_per_month']}**")
     lines.append(f"- Wins: **{stats['wins']}** | Losses: **{stats['losses']}** | Expired: **{stats['expired']}**")
     lines.append(f"- Win rate: **{stats['win_rate']}%**")
     lines.append(f"- Avg RR: **{stats['avg_rr']}**")
-    lines.append(f"- Avg R per trade: **{stats['avg_r']}**")
-    lines.append(f"- Total R over {months_back} months: **{stats['total_r']}R**")
+    lines.append(f"- Avg R/trade: **{stats['avg_r']}**")
+    lines.append(f"- Total R over {months_back} mo: **{stats['total_r']}R**")
     lines.append(f"- **Monthly R: {stats['monthly_r']}R**")
     lines.append(f"- Avg hold: **{stats['avg_hold_h']}h**\n")
 
@@ -267,7 +258,7 @@ def format_report(all_signals, months_back):
     lines.append("")
 
     if all_signals:
-        lines.append("## Signal List (Chronological)\n")
+        lines.append("## Signals (Chronological)\n")
         lines.append("| Date | Pair | Dir | Entry | SL | TP | RR | Outcome | Bars |")
         lines.append("|------|------|-----|------:|----:|----:|----:|---------|-----:|")
         for s in sorted(all_signals, key=lambda x: x['timestamp']):
@@ -286,11 +277,12 @@ def format_report(all_signals, months_back):
 
 def main():
     print("=" * 60)
-    print("MSNR BACKTEST")
+    print("MSNR BACKTEST v2")
     print("=" * 60)
     print(f"Pairs: {len(PAIRS)} | Months: {MONTHS_BACK}\n")
 
     all_signals = []
+    counters = Counter()
 
     for pair in PAIRS:
         print(f"\n--- {pair} ---")
@@ -314,7 +306,7 @@ def main():
                 print("    Insufficient data, skipping")
                 continue
 
-            signals = run_pair(pair, h4, h1, daily, verbose=True)
+            signals = run_pair(pair, h4, h1, daily, counters, verbose=True)
             all_signals.extend(signals)
 
         except Exception as e:
@@ -322,12 +314,18 @@ def main():
             continue
 
     print("\n" + "=" * 60)
-    print("Writing reports...")
+    print("Pipeline counters:")
+    print(f"  Storyline-active scans:  {counters['storyline_active']}")
+    print(f"  Setups found:            {counters['setups_found']}")
+    print(f"  Rejections detected:     {counters['rejections_found']}")
+    print(f"  Confirmations found:     {counters['confirmations_found']}")
+    print(f"  Signals taken:           {counters['signals_taken']}")
+    print("=" * 60)
 
-    report = format_report(all_signals, MONTHS_BACK)
+    print("Writing reports...")
+    report = format_report(all_signals, MONTHS_BACK, counters)
     with open("backtest_report.md", "w") as f:
         f.write(report)
-
     with open("backtest_trades.json", "w") as f:
         json.dump(all_signals, f, indent=2, default=str)
 

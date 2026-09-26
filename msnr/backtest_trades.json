@@ -44,6 +44,48 @@
   {
     "pair": "USDJPY",
     "direction": "sell",
+    "entry": 159.001,
+    "sl": 159.201,
+    "tp": 158.4275,
+    "rr": 2.87,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 57.3,
+    "stop_pips": 20.0,
+    "target_pips": 57.3,
+    "entry_zone": {
+      "type": "flip",
+      "level": 159.001,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 184
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 158.4275,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787284800,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787324400,
+    "timestamp": 1787284800,
+    "outcome": "win",
+    "exit_price": 158.4275,
+    "exit_idx": 566,
+    "bars_held": 1,
+    "ambiguous": false
+  },
+  {
+    "pair": "USDJPY",
+    "direction": "sell",
     "entry": 157.9755,
     "sl": 158.1755,
     "tp": 156.956,
@@ -170,54 +212,57 @@
   {
     "pair": "XAUUSD",
     "direction": "sell",
-    "entry": 4405.23,
-    "sl": 4407.23,
-    "tp": 4396.035,
-    "rr": 4.6,
+    "entry": 4414.47,
+    "sl": 4424.47,
+    "tp": 4376.05,
+    "rr": 3.84,
     "storyline": "bearish",
     "risk_class": "low",
     "risk_pct": 1.0,
-    "room_pips": 91.9,
+    "room_pips": 76.8,
     "stop_pips": 20.0,
-    "target_pips": 91.9,
+    "target_pips": 76.8,
     "entry_zone": {
-      "type": "resistance",
-      "level": 4405.23,
+      "type": "flip",
+      "level": 4414.47,
       "patterns": [
-        "A"
+        "A",
+        "V",
+        "open_close"
       ],
-      "cluster_count": 1
+      "cluster_count": 4
     },
     "obstacle_zone": {
       "type": "support",
-      "level": 4396.035,
+      "level": 4376.05,
       "patterns": [
+        "V",
         "open_close"
       ]
     },
-    "rejection_candle_epoch": 1786953600,
+    "rejection_candle_epoch": 1786924800,
     "confirmation_method": "open_close",
-    "confirmation_candle_epoch": 1786989600,
-    "timestamp": 1786953600,
+    "confirmation_candle_epoch": 1786964400,
+    "timestamp": 1786924800,
     "outcome": "loss",
-    "exit_price": 4407.23,
+    "exit_price": 4424.47,
     "exit_idx": 540,
-    "bars_held": 1,
-    "ambiguous": true
+    "bars_held": 3,
+    "ambiguous": false
   },
   {
     "pair": "XAUUSD",
     "direction": "sell",
     "entry": 4630.56,
-    "sl": 4632.56,
-    "tp": 4623.42,
-    "rr": 3.57,
+    "sl": 4640.56,
+    "tp": 4609.945,
+    "rr": 2.06,
     "storyline": "bearish",
     "risk_class": "low",
     "risk_pct": 1.0,
-    "room_pips": 71.4,
+    "room_pips": 41.2,
     "stop_pips": 20.0,
-    "target_pips": 71.4,
+    "target_pips": 41.2,
     "entry_zone": {
       "type": "flip",
       "level": 4630.5599999999995,
@@ -226,12 +271,14 @@
         "V",
         "open_close"
       ],
-      "cluster_count": 3
+      "cluster_count": 7
     },
     "obstacle_zone": {
-      "type": "support",
-      "level": 4623.42,
+      "type": "flip",
+      "level": 4609.945,
       "patterns": [
+        "A",
+        "V",
         "open_close"
       ]
     },
@@ -240,7 +287,7 @@
     "confirmation_candle_epoch": 1787821200,
     "timestamp": 1787788800,
     "outcome": "win",
-    "exit_price": 4623.42,
+    "exit_price": 4609.945,
     "exit_idx": 586,
     "bars_held": 1,
     "ambiguous": false
@@ -248,117 +295,126 @@
   {
     "pair": "XAUUSD",
     "direction": "buy",
-    "entry": 4422.68,
-    "sl": 4420.68,
-    "tp": 4427.68,
-    "rr": 2.5,
+    "entry": 4426.7,
+    "sl": 4416.7,
+    "tp": 4452.95,
+    "rr": 2.62,
     "storyline": "bullish",
     "risk_class": "low",
     "risk_pct": 1.0,
-    "room_pips": 50.0,
+    "room_pips": 52.5,
     "stop_pips": 20.0,
-    "target_pips": 50.0,
+    "target_pips": 52.5,
     "entry_zone": {
-      "type": "support",
-      "level": 4422.68,
+      "type": "flip",
+      "level": 4426.7,
       "patterns": [
-        "V"
+        "A",
+        "V",
+        "open_close"
       ],
-      "cluster_count": 1
+      "cluster_count": 11
     },
     "obstacle_zone": {
-      "type": "resistance",
-      "level": 4427.68,
+      "type": "flip",
+      "level": 4452.95,
       "patterns": [
-        "A"
+        "A",
+        "V",
+        "open_close"
       ]
     },
     "rejection_candle_epoch": 1788393600,
     "confirmation_method": "open_close",
     "confirmation_candle_epoch": 1788433200,
     "timestamp": 1788393600,
-    "outcome": "loss",
-    "exit_price": 4420.68,
-    "exit_idx": 616,
-    "bars_held": 1,
-    "ambiguous": true
+    "outcome": "win",
+    "exit_price": 4452.95,
+    "exit_idx": 618,
+    "bars_held": 3,
+    "ambiguous": false
   },
   {
     "pair": "XAUUSD",
     "direction": "buy",
-    "entry": 4396.96,
-    "sl": 4394.96,
-    "tp": 4405.23,
-    "rr": 4.13,
+    "entry": 4385.68,
+    "sl": 4375.68,
+    "tp": 4443.96,
+    "rr": 5.83,
     "storyline": "bullish",
     "risk_class": "low",
     "risk_pct": 1.0,
-    "room_pips": 82.7,
+    "room_pips": 116.6,
     "stop_pips": 20.0,
-    "target_pips": 82.7,
+    "target_pips": 116.6,
     "entry_zone": {
-      "type": "support",
-      "level": 4396.96,
+      "type": "flip",
+      "level": 4385.68,
       "patterns": [
-        "V"
+        "A",
+        "V",
+        "open_close"
       ],
-      "cluster_count": 1
+      "cluster_count": 14
     },
     "obstacle_zone": {
-      "type": "resistance",
-      "level": 4405.23,
+      "type": "flip",
+      "level": 4443.96,
       "patterns": [
-        "A"
+        "A",
+        "V",
+        "open_close"
       ]
     },
-    "rejection_candle_epoch": 1788739200,
+    "rejection_candle_epoch": 1788753600,
     "confirmation_method": "open_close",
-    "confirmation_candle_epoch": 1788768000,
-    "timestamp": 1788739200,
+    "confirmation_candle_epoch": 1788789600,
+    "timestamp": 1788753600,
     "outcome": "loss",
-    "exit_price": 4394.96,
-    "exit_idx": 628,
-    "bars_held": 1,
-    "ambiguous": true
+    "exit_price": 4375.68,
+    "exit_idx": 636,
+    "bars_held": 8,
+    "ambiguous": false
   },
   {
     "pair": "XAUUSD",
     "direction": "sell",
     "entry": 4345.01,
-    "sl": 4347.01,
-    "tp": 4339.87,
-    "rr": 2.57,
+    "sl": 4355.01,
+    "tp": 4303.73,
+    "rr": 4.13,
     "storyline": "bearish",
     "risk_class": "low",
     "risk_pct": 1.0,
-    "room_pips": 51.4,
+    "room_pips": 82.6,
     "stop_pips": 20.0,
-    "target_pips": 51.4,
+    "target_pips": 82.6,
     "entry_zone": {
       "type": "flip",
       "level": 4345.01,
       "patterns": [
         "A",
-        "V"
+        "V",
+        "open_close"
       ],
-      "cluster_count": 4
+      "cluster_count": 53
     },
     "obstacle_zone": {
-      "type": "support",
-      "level": 4339.87,
+      "type": "flip",
+      "level": 4303.73,
       "patterns": [
         "A",
-        "open_close"
+        "V"
       ]
     },
     "rejection_candle_epoch": 1790035200,
     "confirmation_method": "open_close",
-    "confirmation_candle_epoch": 1790060400,
+    "confirmation_candle_epoch": 1790071200,
     "timestamp": 1790035200,
-    "outcome": "loss",
-    "exit_price": 4347.01,
+    "outcome": "win",
+    "exit_price": 4303.73,
     "exit_idx": 693,
     "bars_held": 1,
-    "ambiguous": true
+    "ambiguous": false
   }
 ]

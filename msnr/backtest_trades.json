@@ -1,1 +1,126 @@
-[]
+[
+  {
+    "pair": "USDJPY",
+    "direction": "sell",
+    "entry": 159.645,
+    "sl": 159.845,
+    "tp": 158.4275,
+    "rr": 6.09,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 121.8,
+    "stop_pips": 20.0,
+    "target_pips": 121.8,
+    "entry_zone": {
+      "type": "flip",
+      "level": 159.645,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 201
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 158.4275,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787083200,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787104800,
+    "timestamp": 1787083200,
+    "outcome": "win",
+    "exit_price": 158.4275,
+    "exit_idx": 555,
+    "bars_held": 4,
+    "ambiguous": false
+  },
+  {
+    "pair": "USDJPY",
+    "direction": "sell",
+    "entry": 156.956,
+    "sl": 157.156,
+    "tp": 156.265,
+    "rr": 3.46,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 69.1,
+    "stop_pips": 20.0,
+    "target_pips": 69.1,
+    "entry_zone": {
+      "type": "flip",
+      "level": 156.956,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 31
+    },
+    "obstacle_zone": {
+      "type": "support",
+      "level": 156.265,
+      "patterns": [
+        "V"
+      ]
+    },
+    "rejection_candle_epoch": 1788422400,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1788440400,
+    "timestamp": 1788422400,
+    "outcome": "win",
+    "exit_price": 156.265,
+    "exit_idx": 621,
+    "bars_held": 1,
+    "ambiguous": false
+  },
+  {
+    "pair": "USDCAD",
+    "direction": "buy",
+    "entry": 1.37806,
+    "sl": 1.37606,
+    "tp": 1.38994,
+    "rr": 5.94,
+    "storyline": "bullish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 118.8,
+    "stop_pips": 20.0,
+    "target_pips": 118.8,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.378055,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 97
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.38994,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787529600,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787554800,
+    "timestamp": 1787529600,
+    "outcome": "expired",
+    "exit_price": 1.38592,
+    "exit_idx": 582,
+    "bars_held": 12,
+    "ambiguous": false
+  }
+]

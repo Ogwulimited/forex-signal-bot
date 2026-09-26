@@ -1,91 +1,53 @@
 """
-MSNR H1 Confirmation Engine
+MSNR H1 Confirmation Engine v2
 
-After an H4 rejection opens the entry window, we wait for an H1 break
-in the trade direction. Confirmation can be either:
-
-  - Structure break (QM) — the stronger signal
-  - Open-close break — a candle closes beyond the prior candle's range
-    in the trade direction — the softer signal
-
-Window (from Session 4 Q&A):
-  The confirmation must occur within the NEXT H4 candle after the
-  rejection candle closes. If 4 hours elapse with no confirmation,
-  the setup dies.
-
-Session 4 Topic 21:
-  "for storylines it has to be a break of structure on one time frame
-   lower, but for a confirmation entry on the H4 and H1 it could even
-   be an open close"
+Changes from v1:
+  - Confirmation window extended to 2 H4 candles (8 hours) from 1 (4 hours)
+  - Window starts at the close of the rejection H4 candle
+  - Accepts QM (structure break) or open-close break
 """
 
-from zone_filter import PIP_SCALE
 from qm_detector import detect_qm
 
 
-H4_SECONDS = 4 * 3600           # 14400 seconds per H4 candle
-WINDOW_H4_CANDLES = 1           # exactly one H4 candle of grace
+H4_SECONDS = 4 * 3600
+WINDOW_H4_CANDLES = 2           # was 1 — now 8 hours of grace
 
 
 def _epoch(candle):
-    """Extract epoch from candle dict; 0 if missing."""
     return candle.get('datetime', 0)
 
 
 def _open_close_break(h1_candles, direction):
-    """
-    Look for an open-close break on the most recent H1 candles.
-    An open-close break occurs when a candle closes beyond the
-    prior candle's range in the trade direction.
-
-    Returns the break candle dict or None.
-    """
+    """Return the most recent open-close break candle or None."""
     if len(h1_candles) < 2:
         return None
 
-    # Examine candles from most recent backward (prefer fresh breaks)
     for i in range(len(h1_candles) - 1, 0, -1):
         prev = h1_candles[i - 1]
         curr = h1_candles[i]
-
         if direction == 'bearish':
             if curr['close'] < prev['low']:
                 return curr
-        else:  # bullish
+        else:
             if curr['close'] > prev['high']:
                 return curr
     return None
 
 
-def _qm_break(h1_candles, direction, pair):
-    """
-    Look for an H1 QM in the trade direction.
-    Returns the QM dict or None.
-    """
-    return detect_qm(h1_candles, direction, pair=pair, debug=False)
+def _infer_direction(rejection):
+    """Determine trade direction from the rejection zone type + storyline."""
+    zt = rejection['rejection_zone']['type']
+    storyline = rejection.get('_storyline')
+    if storyline:
+        return 'bearish' if storyline == 'bearish' else 'bullish'
+    return 'bearish' if zt in ('resistance', 'flip') else 'bullish'
 
 
 def detect_h1_confirmation(rejection, h1_candles, pair, debug=False):
     """
-    Given a rejection (from rejection_detector) and the H1 candles,
-    check whether confirmation has occurred within the open window.
-
-    Parameters:
-    - rejection: dict from detect_h4_rejection
-    - h1_candles: list of H1 candle dicts (most recent last)
-    - pair: pair name
-    - debug: print reasoning
-
-    Returns:
-    - dict or None:
-      {
-        'confirmed': True,
-        'method': 'qm' | 'open_close',
-        'break_candle': {...},
-        'break_index_h1': int,
-        'window_epoch_start': epoch,
-        'window_epoch_end': epoch,
-      }
+    Given a rejection and the full H1 series, check whether confirmation
+    occurred within the open window.
     """
     if not rejection or not rejection.get('active_window'):
         return None
@@ -97,47 +59,35 @@ def detect_h1_confirmation(rejection, h1_candles, pair, debug=False):
             print("  [CONF] rejection candle missing epoch")
         return None
 
-    # Window opens at the close of the rejection H4 candle
+    # Window: opens at close of rejection H4 candle, extends for WINDOW_H4_CANDLES
     window_start = rej_epoch + H4_SECONDS
     window_end = window_start + (WINDOW_H4_CANDLES * H4_SECONDS)
 
     if debug:
         print(f"  [CONF] window: {window_start} → {window_end} "
-              f"(rejection close + 1 H4)")
+              f"({WINDOW_H4_CANDLES} H4 candles)")
 
-    # Filter H1 candles to those inside the window
     window_h1 = [c for c in h1_candles
                  if _epoch(c) >= window_start and _epoch(c) < window_end]
 
     if debug:
         print(f"  [CONF] H1 candles in window: {len(window_h1)}")
-        if window_h1:
-            first_e = _epoch(window_h1[0])
-            last_e = _epoch(window_h1[-1])
-            print(f"  [CONF] window H1 epochs: {first_e} → {last_e}")
 
     if not window_h1:
         if debug:
-            print(f"  [CONF] window not yet started or no H1 candles in range")
+            print(f"  [CONF] no H1 candles in window")
         return None
 
-    # Try QM first (stronger signal)
-    qm = _qm_break(window_h1, rejection['rejection_zone']['type'] == 'resistance'
-                   and 'bearish' or 'bullish', pair)
-    # Determine direction from rejection structure
-    # We can infer: rejection was against a resistance → bearish trade
-    #                rejection was against a support → bullish trade
-    trade_direction = 'bearish' if _is_bearish_rejection(rejection) else 'bullish'
+    direction = _infer_direction(rejection)
 
-    qm = _qm_break(window_h1, trade_direction, pair)
-
+    # Try QM first
+    qm = detect_qm(window_h1, direction, pair=pair, debug=False)
     if qm:
-        # Find the QM's candle in window_h1
         break_epoch = _epoch(qm['break_candle'])
         idx = next((i for i, c in enumerate(window_h1)
                     if _epoch(c) == break_epoch), None)
         if debug:
-            print(f"  [CONF] ✅ QM break confirmed ({trade_direction})")
+            print(f"  [CONF] ✅ QM confirmed ({direction})")
         return {
             'confirmed': True,
             'method': 'qm',
@@ -148,12 +98,12 @@ def detect_h1_confirmation(rejection, h1_candles, pair, debug=False):
         }
 
     # Fall back to open-close break
-    oc = _open_close_break(window_h1, trade_direction)
+    oc = _open_close_break(window_h1, direction)
     if oc:
         idx = next((i for i, c in enumerate(window_h1)
                     if _epoch(c) == _epoch(oc)), None)
         if debug:
-            print(f"  [CONF] ✅ Open-close break confirmed ({trade_direction})")
+            print(f"  [CONF] ✅ Open-close confirmed ({direction})")
         return {
             'confirmed': True,
             'method': 'open_close',
@@ -164,14 +114,5 @@ def detect_h1_confirmation(rejection, h1_candles, pair, debug=False):
         }
 
     if debug:
-        print(f"  [CONF] no confirmation yet in window")
+        print(f"  [CONF] no confirmation in window")
     return None
-
-
-def _is_bearish_rejection(rejection):
-    """
-    A rejection is bearish if the zone is resistance or flip.
-    Bullish if the zone is support.
-    """
-    zt = rejection['rejection_zone']['type']
-    return zt in ('resistance', 'flip') and rejection.get('_storyline') == 'bearish'

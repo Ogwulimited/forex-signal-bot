@@ -1,17 +1,19 @@
 """
-MSNR H1 Confirmation Engine v2
+MSNR H1 Confirmation Engine v3
 
-Changes from v1:
-  - Confirmation window extended to 2 H4 candles (8 hours) from 1 (4 hours)
-  - Window starts at the close of the rejection H4 candle
-  - Accepts QM (structure break) or open-close break
+Changes from v2:
+  - Open-close break loosened: now uses CLOSE-TO-CLOSE comparison
+    (was: full-range engulfment, which was too strict and blocked
+    EURUSD/GBPUSD/AUDUSD from ever confirming)
+  - QM check retained as primary confirmation path
+  - Confirmation window: 2 H4 candles (8 hours) from rejection close
 """
 
 from qm_detector import detect_qm
 
 
 H4_SECONDS = 4 * 3600
-WINDOW_H4_CANDLES = 2           # was 1 — now 8 hours of grace
+WINDOW_H4_CANDLES = 2
 
 
 def _epoch(candle):
@@ -19,7 +21,15 @@ def _epoch(candle):
 
 
 def _open_close_break(h1_candles, direction):
-    """Return the most recent open-close break candle or None."""
+    """
+    Return the most recent open-close break candle or None.
+
+    Definition loosened per Session 4 Topic 21:
+    "for a confirmation entry on the H4 and H1 it could even be an open close"
+    → A break is a close beyond the PRIOR CANDLE'S CLOSE, not full-range
+    engulfment. Full-range engulfment was blocking all confirmations on
+    the slower forex pairs.
+    """
     if len(h1_candles) < 2:
         return None
 
@@ -27,10 +37,10 @@ def _open_close_break(h1_candles, direction):
         prev = h1_candles[i - 1]
         curr = h1_candles[i]
         if direction == 'bearish':
-            if curr['close'] < prev['low']:
+            if curr['close'] < prev['close']:
                 return curr
-        else:
-            if curr['close'] > prev['high']:
+        else:  # bullish
+            if curr['close'] > prev['close']:
                 return curr
     return None
 
@@ -48,6 +58,22 @@ def detect_h1_confirmation(rejection, h1_candles, pair, debug=False):
     """
     Given a rejection and the full H1 series, check whether confirmation
     occurred within the open window.
+
+    Parameters:
+    - rejection: dict from detect_h4_rejection
+    - h1_candles: full H1 candle list (window sliced internally)
+    - pair: pair name
+    - debug: print reasoning
+
+    Returns dict or None:
+      {
+        'confirmed': True,
+        'method': 'qm' | 'open_close',
+        'break_candle': {...},
+        'break_index_h1': int,
+        'window_epoch_start': epoch,
+        'window_epoch_end': epoch,
+      }
     """
     if not rejection or not rejection.get('active_window'):
         return None
@@ -59,7 +85,7 @@ def detect_h1_confirmation(rejection, h1_candles, pair, debug=False):
             print("  [CONF] rejection candle missing epoch")
         return None
 
-    # Window: opens at close of rejection H4 candle, extends for WINDOW_H4_CANDLES
+    # Window: opens at close of rejection H4 candle
     window_start = rej_epoch + H4_SECONDS
     window_end = window_start + (WINDOW_H4_CANDLES * H4_SECONDS)
 
@@ -80,7 +106,7 @@ def detect_h1_confirmation(rejection, h1_candles, pair, debug=False):
 
     direction = _infer_direction(rejection)
 
-    # Try QM first
+    # Try QM first (stronger signal)
     qm = detect_qm(window_h1, direction, pair=pair, debug=False)
     if qm:
         break_epoch = _epoch(qm['break_candle'])

@@ -1,6 +1,6 @@
 """
-MSNR Backtest Engine v3
-- Adds XAUUSD
+MSNR Backtest Engine v4
+- Expanded to 19 pairs (18 forex + XAUUSD)
 - Per-pair pipeline counters
 """
 
@@ -19,7 +19,17 @@ from confirmation_engine import detect_h1_confirmation
 from signal_builder import build_signal
 
 
-PAIRS = ["EURUSD", "GBPUSD", "USDJPY", "USDCAD", "AUDUSD", "XAUUSD"]
+PAIRS = [
+    # Majors / non-JPY
+    "EURUSD", "GBPUSD", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD",
+    # JPY-quoted
+    "USDJPY", "EURJPY", "GBPJPY", "AUDJPY", "CADJPY", "CHFJPY", "NZDJPY",
+    # Crosses (non-JPY)
+    "EURGBP", "EURAUD", "EURCHF", "EURNZD", "GBPAUD",
+    # Metals
+    "XAUUSD",
+]
+
 MONTHS_BACK = 6
 H4_SECONDS = 4 * 3600
 DAY_SECONDS = 86400
@@ -234,7 +244,7 @@ def format_report(all_signals, months_back, total_counters, per_pair_counters):
 
 def main():
     print("=" * 60)
-    print("MSNR BACKTEST v3 (with XAUUSD + per-pair counters)")
+    print("MSNR BACKTEST v4 (19 pairs)")
     print("=" * 60)
     print(f"Pairs: {len(PAIRS)} | Months: {MONTHS_BACK}\n")
 

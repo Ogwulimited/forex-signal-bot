@@ -1,5 +1,131 @@
 [
   {
+    "pair": "USDCAD",
+    "direction": "buy",
+    "entry": 1.37806,
+    "sl": 1.37606,
+    "tp": 1.38994,
+    "rr": 5.94,
+    "storyline": "bullish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 118.8,
+    "stop_pips": 20.0,
+    "target_pips": 118.8,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.378055,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 97
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.38994,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787529600,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787569200,
+    "timestamp": 1787529600,
+    "outcome": "expired",
+    "exit_price": 1.38592,
+    "exit_idx": 582,
+    "bars_held": 12,
+    "ambiguous": false
+  },
+  {
+    "pair": "USDCAD",
+    "direction": "buy",
+    "entry": 1.38723,
+    "sl": 1.38523,
+    "tp": 1.39792,
+    "rr": 5.34,
+    "storyline": "bullish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 106.8,
+    "stop_pips": 20.0,
+    "target_pips": 106.8,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.387235,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 210
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.397915,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1789358400,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1789390800,
+    "timestamp": 1789358400,
+    "outcome": "expired",
+    "exit_price": 1.39369,
+    "exit_idx": 673,
+    "bars_held": 12,
+    "ambiguous": false
+  },
+  {
+    "pair": "USDCHF",
+    "direction": "buy",
+    "entry": 0.80123,
+    "sl": 0.79923,
+    "tp": 0.81671,
+    "rr": 7.74,
+    "storyline": "bullish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 154.7,
+    "stop_pips": 20.0,
+    "target_pips": 154.7,
+    "entry_zone": {
+      "type": "flip",
+      "level": 0.8012349999999999,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 283
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 0.816705,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787558400,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787598000,
+    "timestamp": 1787558400,
+    "outcome": "expired",
+    "exit_price": 0.80392,
+    "exit_idx": 584,
+    "bars_held": 12,
+    "ambiguous": false
+  },
+  {
     "pair": "USDJPY",
     "direction": "sell",
     "entry": 159.6605,
@@ -126,87 +252,536 @@
     "ambiguous": false
   },
   {
-    "pair": "USDCAD",
+    "pair": "GBPJPY",
     "direction": "buy",
-    "entry": 1.37806,
-    "sl": 1.37606,
-    "tp": 1.38994,
-    "rr": 5.94,
+    "entry": 208.2635,
+    "sl": 208.0635,
+    "tp": 208.69,
+    "rr": 2.13,
     "storyline": "bullish",
     "risk_class": "low",
     "risk_pct": 1.0,
-    "room_pips": 118.8,
+    "room_pips": 42.7,
     "stop_pips": 20.0,
-    "target_pips": 118.8,
+    "target_pips": 42.7,
+    "entry_zone": {
+      "type": "support",
+      "level": 208.2635,
+      "patterns": [
+        "open_close"
+      ],
+      "cluster_count": 1
+    },
+    "obstacle_zone": {
+      "type": "resistance",
+      "level": 208.69,
+      "patterns": [
+        "A"
+      ]
+    },
+    "rejection_candle_epoch": 1789099200,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1789138800,
+    "timestamp": 1789099200,
+    "outcome": "loss",
+    "exit_price": 208.0635,
+    "exit_idx": 656,
+    "bars_held": 1,
+    "ambiguous": false
+  },
+  {
+    "pair": "GBPJPY",
+    "direction": "buy",
+    "entry": 208.2635,
+    "sl": 208.0635,
+    "tp": 208.69,
+    "rr": 2.13,
+    "storyline": "bullish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 42.7,
+    "stop_pips": 20.0,
+    "target_pips": 42.7,
+    "entry_zone": {
+      "type": "support",
+      "level": 208.2635,
+      "patterns": [
+        "open_close"
+      ],
+      "cluster_count": 1
+    },
+    "obstacle_zone": {
+      "type": "resistance",
+      "level": 208.69,
+      "patterns": [
+        "A"
+      ]
+    },
+    "rejection_candle_epoch": 1789372800,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1789412400,
+    "timestamp": 1789372800,
+    "outcome": "win",
+    "exit_price": 208.69,
+    "exit_idx": 663,
+    "bars_held": 1,
+    "ambiguous": false
+  },
+  {
+    "pair": "AUDJPY",
+    "direction": "sell",
+    "entry": 113.156,
+    "sl": 113.356,
+    "tp": 111.826,
+    "rr": 6.65,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 133.0,
+    "stop_pips": 20.0,
+    "target_pips": 133.0,
     "entry_zone": {
       "type": "flip",
-      "level": 1.378055,
+      "level": 113.156,
       "patterns": [
         "A",
         "V",
         "open_close"
       ],
-      "cluster_count": 97
+      "cluster_count": 290
     },
     "obstacle_zone": {
       "type": "flip",
-      "level": 1.38994,
+      "level": 111.826,
       "patterns": [
         "A",
         "V",
         "open_close"
       ]
     },
-    "rejection_candle_epoch": 1787529600,
+    "rejection_candle_epoch": 1787083200,
     "confirmation_method": "open_close",
-    "confirmation_candle_epoch": 1787569200,
-    "timestamp": 1787529600,
-    "outcome": "expired",
-    "exit_price": 1.38592,
-    "exit_idx": 582,
+    "confirmation_candle_epoch": 1787122800,
+    "timestamp": 1787097600,
+    "outcome": "loss",
+    "exit_price": 113.356,
+    "exit_idx": 564,
     "bars_held": 12,
     "ambiguous": false
   },
   {
-    "pair": "USDCAD",
-    "direction": "buy",
-    "entry": 1.38723,
-    "sl": 1.38523,
-    "tp": 1.39792,
-    "rr": 5.34,
-    "storyline": "bullish",
+    "pair": "CADJPY",
+    "direction": "sell",
+    "entry": 114.674,
+    "sl": 114.874,
+    "tp": 113.02,
+    "rr": 8.27,
+    "storyline": "bearish",
     "risk_class": "low",
     "risk_pct": 1.0,
-    "room_pips": 106.8,
+    "room_pips": 165.4,
     "stop_pips": 20.0,
-    "target_pips": 106.8,
+    "target_pips": 165.4,
     "entry_zone": {
       "type": "flip",
-      "level": 1.387235,
+      "level": 114.674,
       "patterns": [
         "A",
         "V",
         "open_close"
       ],
-      "cluster_count": 210
+      "cluster_count": 323
     },
     "obstacle_zone": {
       "type": "flip",
-      "level": 1.397915,
+      "level": 113.02,
       "patterns": [
         "A",
         "V",
         "open_close"
       ]
     },
-    "rejection_candle_epoch": 1789358400,
+    "rejection_candle_epoch": 1787155200,
     "confirmation_method": "open_close",
-    "confirmation_candle_epoch": 1789390800,
-    "timestamp": 1789358400,
+    "confirmation_candle_epoch": 1787191200,
+    "timestamp": 1787155200,
+    "outcome": "loss",
+    "exit_price": 114.874,
+    "exit_idx": 558,
+    "bars_held": 2,
+    "ambiguous": false
+  },
+  {
+    "pair": "CHFJPY",
+    "direction": "sell",
+    "entry": 191.197,
+    "sl": 191.397,
+    "tp": 190.748,
+    "rr": 2.25,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 44.9,
+    "stop_pips": 20.0,
+    "target_pips": 44.9,
+    "entry_zone": {
+      "type": "flip",
+      "level": 191.197,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 4
+    },
+    "obstacle_zone": {
+      "type": "support",
+      "level": 190.748,
+      "patterns": [
+        "V"
+      ]
+    },
+    "rejection_candle_epoch": 1790294400,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1790334000,
+    "timestamp": 1790294400,
+    "outcome": "win",
+    "exit_price": 190.748,
+    "exit_idx": 715,
+    "bars_held": 1,
+    "ambiguous": false
+  },
+  {
+    "pair": "EURGBP",
+    "direction": "buy",
+    "entry": 0.85656,
+    "sl": 0.85456,
+    "tp": 0.86164,
+    "rr": 2.54,
+    "storyline": "bullish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 50.8,
+    "stop_pips": 20.0,
+    "target_pips": 50.8,
+    "entry_zone": {
+      "type": "flip",
+      "level": 0.85656,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 172
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 0.86164,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787774400,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787814000,
+    "timestamp": 1787788800,
     "outcome": "expired",
-    "exit_price": 1.39369,
-    "exit_idx": 673,
+    "exit_price": 0.85584,
+    "exit_idx": 600,
     "bars_held": 12,
+    "ambiguous": false
+  },
+  {
+    "pair": "EURGBP",
+    "direction": "sell",
+    "entry": 0.85804,
+    "sl": 0.86004,
+    "tp": 0.84806,
+    "rr": 4.99,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 99.9,
+    "stop_pips": 20.0,
+    "target_pips": 99.9,
+    "entry_zone": {
+      "type": "flip",
+      "level": 0.858045,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 207
+    },
+    "obstacle_zone": {
+      "type": "support",
+      "level": 0.848055,
+      "patterns": [
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1788854400,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1788890400,
+    "timestamp": 1788854400,
+    "outcome": "expired",
+    "exit_price": 0.85869,
+    "exit_idx": 650,
+    "bars_held": 12,
+    "ambiguous": false
+  },
+  {
+    "pair": "EURAUD",
+    "direction": "sell",
+    "entry": 1.63503,
+    "sl": 1.63703,
+    "tp": 1.61614,
+    "rr": 9.45,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 188.9,
+    "stop_pips": 20.0,
+    "target_pips": 188.9,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.63503,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 299
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.61614,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787299200,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787331600,
+    "timestamp": 1787313600,
+    "outcome": "expired",
+    "exit_price": 1.63046,
+    "exit_idx": 579,
+    "bars_held": 12,
+    "ambiguous": false
+  },
+  {
+    "pair": "EURAUD",
+    "direction": "sell",
+    "entry": 1.62924,
+    "sl": 1.63124,
+    "tp": 1.61614,
+    "rr": 6.55,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 131.0,
+    "stop_pips": 20.0,
+    "target_pips": 131.0,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.62924,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 306
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.61614,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787544000,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787576400,
+    "timestamp": 1787544000,
+    "outcome": "loss",
+    "exit_price": 1.63124,
+    "exit_idx": 573,
+    "bars_held": 2,
+    "ambiguous": false
+  },
+  {
+    "pair": "EURAUD",
+    "direction": "sell",
+    "entry": 1.62544,
+    "sl": 1.62744,
+    "tp": 1.61614,
+    "rr": 4.65,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 93.0,
+    "stop_pips": 20.0,
+    "target_pips": 93.0,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.62544,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 263
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.61614,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787731200,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787770800,
+    "timestamp": 1787731200,
+    "outcome": "expired",
+    "exit_price": 1.61892,
+    "exit_idx": 596,
+    "bars_held": 12,
+    "ambiguous": false
+  },
+  {
+    "pair": "GBPAUD",
+    "direction": "sell",
+    "entry": 1.90626,
+    "sl": 1.90826,
+    "tp": 1.89898,
+    "rr": 3.64,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 72.8,
+    "stop_pips": 20.0,
+    "target_pips": 72.8,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.90626,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 124
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.89898,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1787011200,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1787050800,
+    "timestamp": 1787011200,
+    "outcome": "loss",
+    "exit_price": 1.90826,
+    "exit_idx": 549,
+    "bars_held": 3,
+    "ambiguous": false
+  },
+  {
+    "pair": "GBPAUD",
+    "direction": "sell",
+    "entry": 1.87651,
+    "sl": 1.87851,
+    "tp": 1.8702,
+    "rr": 3.16,
+    "storyline": "bearish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 63.1,
+    "stop_pips": 20.0,
+    "target_pips": 63.1,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.876515,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 189
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.870205,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ]
+    },
+    "rejection_candle_epoch": 1789689600,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1789729200,
+    "timestamp": 1789689600,
+    "outcome": "loss",
+    "exit_price": 1.87851,
+    "exit_idx": 687,
+    "bars_held": 3,
+    "ambiguous": false
+  },
+  {
+    "pair": "GBPAUD",
+    "direction": "buy",
+    "entry": 1.88177,
+    "sl": 1.87977,
+    "tp": 1.89449,
+    "rr": 6.36,
+    "storyline": "bullish",
+    "risk_class": "low",
+    "risk_pct": 1.0,
+    "room_pips": 127.2,
+    "stop_pips": 20.0,
+    "target_pips": 127.2,
+    "entry_zone": {
+      "type": "flip",
+      "level": 1.8817650000000001,
+      "patterns": [
+        "A",
+        "V",
+        "open_close"
+      ],
+      "cluster_count": 263
+    },
+    "obstacle_zone": {
+      "type": "flip",
+      "level": 1.89449,
+      "patterns": [
+        "A",
+        "V"
+      ]
+    },
+    "rejection_candle_epoch": 1790208000,
+    "confirmation_method": "open_close",
+    "confirmation_candle_epoch": 1790244000,
+    "timestamp": 1790208000,
+    "outcome": "expired",
+    "exit_price": 1.88522,
+    "exit_idx": 719,
+    "bars_held": 11,
     "ambiguous": false
   },
   {

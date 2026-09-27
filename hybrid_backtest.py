@@ -19,8 +19,10 @@ from collections import Counter
 from datetime import datetime, timezone
 
 # Add msnr/ to path so we can import its modules
+# NOTE: use append (not insert) so root versions win for shared names
+# like rejection_detector and market_data.
 _HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(_HERE, 'msnr'))
+sys.path.append(os.path.join(_HERE, 'msnr'))
 
 from market_data import fetch_candles
 from mtf_bias_engine import analyze_trend

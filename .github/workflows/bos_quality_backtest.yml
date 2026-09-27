@@ -1,0 +1,34 @@
+name: BOS Quality Backtest
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests websocket-client
+
+      - name: Run BOS quality backtest
+        run: python bos_quality_backtest.py
+
+      - name: Commit reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bos_quality_report.md bos_quality_signals.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update BOS quality backtest [skip ci]"
+          git push

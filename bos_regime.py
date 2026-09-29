@@ -11,9 +11,19 @@ Strict mode rules (no counter-trend):
   4H bearish + 1H bullish → 'bearish_transition' → WAIT
   4H bearish + 1H ranging → 'bearish_neutral'    → WAIT
   4H ranging              → 'ranging'            → WAIT
+
+Cascade override:
+  Even when 4H and 1H both say bullish, if a FRESH bearish CHoCH
+  just fired on 1H, we downgrade to transition. Same in reverse.
+  This is Stage 1 of the cascade — the first crack before the HTF
+  confirms the flip.
 """
 
 from bos_structure import analyze as analyze_structure, detect_choch
+
+
+# How many candles after a CHoCH we still treat it as "fresh"
+CHoCH_OVERRIDE_FRESHNESS = 5
 
 
 def get_regime(candles_4h, candles_1h, debug=False):
@@ -25,6 +35,7 @@ def get_regime(candles_4h, candles_1h, debug=False):
         'structure_4h': {...},
         'structure_1h': {...},
         'choch_1h': {...} or None,
+        'override_applied': bool,
     }
     """
     s4 = analyze_structure(candles_4h, debug=debug)
@@ -38,6 +49,7 @@ def get_regime(candles_4h, candles_1h, debug=False):
         print(f"  [REGIME] 4H={state_4h} | 1H={state_1h} | "
               f"CHoCH={choch_1h['type'] if choch_1h else 'none'}")
 
+    # ─── Base classification ───
     regime = 'unknown'
     direction = None
 
@@ -60,10 +72,26 @@ def get_regime(candles_4h, candles_1h, debug=False):
     elif state_4h == 'ranging':
         regime = 'ranging'
 
+    # ─── Cascade override: fresh CHoCH against the HTF bias ───
+    override_applied = False
+    if choch_1h and choch_1h['candles_since'] <= CHoCH_OVERRIDE_FRESHNESS:
+        if regime == 'bullish_active' and choch_1h['type'] == 'bearish_choch':
+            regime = 'bullish_transition'
+            direction = None
+            override_applied = True
+        elif regime == 'bearish_active' and choch_1h['type'] == 'bullish_choch':
+            regime = 'bearish_transition'
+            direction = None
+            override_applied = True
+
+    if debug and override_applied:
+        print(f"  [REGIME] ⚠️ CHoCH override applied → {regime}")
+
     return {
         'regime': regime,
         'trade_direction': direction,
         'structure_4h': s4,
         'structure_1h': s1,
         'choch_1h': choch_1h,
+        'override_applied': override_applied,
     }

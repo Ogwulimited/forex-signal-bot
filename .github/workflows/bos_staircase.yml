@@ -1,0 +1,28 @@
+name: BOS Staircase Backtest
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install requests websocket-client
+      - name: Run staircase
+        run: python bos_staircase_backtest.py
+      - name: Commit reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bos_staircase_report.md bos_staircase_signals.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update BOS staircase report [skip ci]"
+          git push

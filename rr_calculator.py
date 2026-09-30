@@ -1,8 +1,8 @@
 """
-Strict Risk/Reward calculator – minimum 2.0.
+Strict Risk/Reward calculator – minimum 2.5.
 """
 
-def calculate_rr(candles, direction, rejection, sweep, min_rr=2.0, debug=False):
+def calculate_rr(candles, direction, rejection, sweep, min_rr=2.5, debug=False):
     if not rejection or not sweep:
         return None
 
